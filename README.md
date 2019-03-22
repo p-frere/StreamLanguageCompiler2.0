@@ -53,7 +53,7 @@
 #### Grammar for the Input 
 
 ```
-TODO
+<input> 	:= <int> | <int> <input>
 
 <intList> 	:= <int> | <int>, <intList>
 <int> 		:= <posInt> | <negInt> | <zero>
@@ -101,42 +101,61 @@ TODO
 ## Programs
 Challenge 1
 ```
-set past = [(0,0)]
+set past = [([0],[0])]
+set inStreamCount = 1
 
 s0.in1
 
-(MtInCnt 1, MtPst [(0,0)], MtFuncs [ExVar "s0.in1"])
+
+EXPR = (MtInCnt 1, MtPst [(0,0)], MtFuncs [ExVar "s0.in1"])
 ```
 Challenge 2
 ```
-set past = 0
+set pastCount = 0
+set inStreamCount = 1
 
 s0
 s0
 
-(MtInCnt 1, MtPstSize 0, MtFuncs [ExVar "s0",ExVar "s0"])
+EXPR = (MtInCnt 1, MtPstSize 0, MtFuncs [ExVar "s0",ExVar "s0"])
 ```
 
 Challenge 3
 ```
-set past = 0
+set inStreamCount = 2
+set pastCount = 0
 
 s1 * 3 + s0
 
-(MtInCnt 2, MtPstSize 0, MtFuncs [ExSum (ExMult (ExVar "s1") (ExInt 3)) (ExVar "s0")]
+EXPR = (MtInCnt 2, MtPstSize 0, MtFuncs [ExSum (ExMult (ExVar "s1") (ExInt 3)) (ExVar "s0")]
 ```
 
 Challenge 4
 ```
-set past = 1
+set pastCount = 1
+set inStreamCount = 1
 
 s0.out1 + s0
+
+EXPR = (MtInCnt 1, MtPstSize 1, MtFuncs [ExSum (ExVar "s0.out1") (ExVar "s0")]
 ```
 Challenge 5
 ```
-set past = 2
+set pastCount = 2
+set inStreamCount = 1
 
 s0.out1 + s0.out2 + s0
+
+EXPR = (MtInCnt 1, MtPstSize 1, MtFuncs [ExSum (ExSum (ExVar "s0.out1") (ExVar "s0.out2")) (ExVar "s0")]
+```
+
+
+
+##### Parsing for the Input
+
+```
+1 		= [ExInt 1]
+1 2 	= [ExInt 1, ExInt 2]
 ```
 
 
