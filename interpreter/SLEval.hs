@@ -34,30 +34,53 @@ data Meta = MtFuncs [Expr]
             | MtPst Past   
             | MtPstSize Int
             | MtInCnt Int
+-------
 
-evalFunc :: [Meta] -> [Expr] 
---evalFunc (MtInCnt i, MtPstSize p, MtFuncs fs) = 
--- evalFunc (MtInCnt i, MtPast ps, MtFuncs fs) = 
+getPast :: (Meta,Meta,Meta) -> Past
+getPast (MtPstSize s, MtPstSize p, f) = generatePast s p
+getPast (s, MtPst p, f) = p
 
-generateLam -> [String]
+generatePast :: Int -> Int  -> Past
+generatePast strCnt pstCnt
+    | pstCnt > 0  = (replicate0 strCnt,replicate0 strCnt) : generatePast strCnt (pstCnt-1)
+    | otherwise = []
+    where 
+        replicate0 n = map (\x -> ExInt x) (replicate n 0)
 
--- steram count, past size
-generateVars :: int -> int -> [String]
-generateVars s p  = streamVars ++ pastVars
-    where   streamVars = (getStreamVars s) 
-            pastVars = [getPastVars s p | s <- streamVars]
+-----------------
 
-getStreamVars ::  int -> [String]
-phraseCounter i 
-    | i > 0 = ["s"++show i] ++ phraseCounter i-1
+evalFunc :: (Meta,Meta,Meta) -> [Expr] 
+evalFunc (MtInCnt i, MtPstSize p, MtFuncs (f:fs))
+    | (fs) /= [] = (generateLam vars f) : evalFunc (MtInCnt i, MtPstSize p, MtFuncs fs)
+    | otherwise = [(generateLam vars f)]
+        where
+            vars = generateVars i p
+    
+-- ExVAr -> Function -> Lam
+generateLam :: [Expr] -> Expr -> Expr
+generateLam [s] f = ExApp f s  
+generateLam (s:ss) f = (ExApp (generateLam ss f) s)
+
+-- steram count, past size -> Vars
+generateVars :: Int -> Int -> [Expr]
+generateVars s p  =  (makeMap streamVars) ++ streamVars
+    where   
+        streamVars = (getStreamVars s) 
+        makeMap ((ExVar sv):svs) 
+            | svs /= [] = getPastVars sv p ++ makeMap (svs)
+            | otherwise = getPastVars sv p
+
+getStreamVars :: Int -> [Expr]
+getStreamVars i 
+    | i > 0 = [ExVar ("s"++show i)] ++ getStreamVars (i-1)
     | otherwise = []
 
-getPastVars :: String -> int -> [String]
-phraseCounter s i 
-    | i > 0 = [s++".in"++show i] ++ [s++".out"++show i] ++ phraseCounter s i-1
+getPastVars :: String -> Int -> [Expr]
+getPastVars s i 
+    | i > 0 = [ExVar (s++".out"++show i)] ++ [ExVar (s++".in"++show i)] ++ getPastVars s (i-1)
     | otherwise = []
 
-
+--------------
 -- function     streamInput         oldPast                         newPast
 -- ExLam()      [s1 s2 s3 ..]       [([1,2],[3]) ([2,3],[5])]       [([1,2],[3]) ([2,3],[5])] 
 evalIn :: FuncList -> InputList -> Past -> Past
