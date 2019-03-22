@@ -16,10 +16,10 @@
 
 ## The Language 
 
-#### Grammar
+#### Grammar for the Program 
 
 ```
-<program> 	:= <exprList> | EOF
+<program> 	:= <metaData> <exprList> | EOF
 <exprList	:= <expr> EOL <exprList> | <expr> EOF
 <expr> 		:= <identifier> | <int> | <funcApp> | ( <expr> )
 <identifier>:= s<posInt> | s<posInt>.<past>
@@ -27,7 +27,14 @@
 <funcApp> 	:= <expr><infxFunc><expr>
 <infxFunc>	:= + |-| *
 
-<intList> 	:= <int> | <int> <intList>
+<metaData>	:= <streamCnt> <past>
+<streamCnt> := SizeStreamsIn = <posInt>
+<past>		:= <pastCnt> | <pastList>
+<pastCnt>	:= SizePast = <posInt>
+<pastList>	:= Past = [(<mapping>,<mapping>)]
+<mapping>	:= [<intList>]
+
+<intList> 	:= <int> | <int>, <intList>
 <int> 		:= <posInt> | <negInt> | <zero>
 <posInt> 	:= <digitNo0> | <digitNo0><digitList> 
 <negInt> 	:= <sign><posInt>
@@ -40,6 +47,26 @@
 ```
 
 \* Comments are represented as ($) and the whole line following is considered white space
+
+
+
+#### Grammar for the Input 
+
+```
+TODO
+
+<intList> 	:= <int> | <int>, <intList>
+<int> 		:= <posInt> | <negInt> | <zero>
+<posInt> 	:= <digitNo0> | <digitNo0><digitList> 
+<negInt> 	:= <sign><posInt>
+<digitList> := <digit><digitList> | <digit>
+<digitNo0> 	:= 1|2|3|4|5|6|7|8|9
+<digit> 	:= 0|1|2|3|4|5|6|7|8|9
+<sign> 		:= -
+<zero>		:= 0
+```
+
+
 
 #### Binding 
 
@@ -57,12 +84,13 @@
 6. evaluates the function
 7. prints and updates history
 8. repeate from step 4
-   reads the first line <- this could be a assignment | expr | var | comment
+   
 
 ## Program Structure
-- set past size
+- set past size or type past
     - set with number,  past is set as all 0's
     - set with array, past takes on past specified and size
+- set number of streams in
 - declare function
     - uses set variable
     - sN where N is number of stream is stream N's input
@@ -76,6 +104,8 @@ Challenge 1
 set past = [(0,0)]
 
 s0.in1
+
+(MtInCnt 1, MtPst [(0,0)], MtFuncs [ExVar "s0.in1"])
 ```
 Challenge 2
 ```
@@ -83,6 +113,8 @@ set past = 0
 
 s0
 s0
+
+(MtInCnt 1, MtPstSize 0, MtFuncs [ExVar "s0",ExVar "s0"])
 ```
 
 Challenge 3
@@ -90,6 +122,8 @@ Challenge 3
 set past = 0
 
 s1 * 3 + s0
+
+(MtInCnt 2, MtPstSize 0, MtFuncs [ExSum (ExMult (ExVar "s1") (ExInt 3)) (ExVar "s0")]
 ```
 
 Challenge 4
@@ -104,5 +138,35 @@ set past = 2
 
 s0.out1 + s0.out2 + s0
 ```
-  
+
+
+
+### DataTypes
+
+```haskell
+
+type Mapping = ([Expr],[Expr])
+type Past = [Mapping]
+type FuncList = [Expr]
+type InputList = [Expr]
+
+type MetaData = (Meta, Meta, Meta)
+
+data Meta = MtFuncs [Expr] 
+            | MtPst Past   
+            | MtPstSize Int
+            | MtInCnt Int
+            
+data Expr = ExInt Int 
+            | ExVar String   
+            | ExSum Expr Expr 
+            | ExSub Expr Expr 
+            | ExMult Expr Expr  
+            | Cl String Expr Environment
+            | ExApp Expr Expr
+            | ExLam String Expr
+            | ExLet String Expr Expr deriving (Show,Eq)
+
+type Environment = [ (String,Expr) ] 
+```
 
