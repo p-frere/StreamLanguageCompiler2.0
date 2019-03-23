@@ -34,7 +34,7 @@ data Meta = MtFuncs [Expr]
             | MtPst Past   
             | MtPstSize Int
             | MtInCnt Int
--------
+----------------past processing-------------------------
 
 getPast :: (Meta,Meta,Meta) -> Past
 getPast (MtPstSize s, MtPstSize p, f) = generatePast s p
@@ -47,7 +47,7 @@ generatePast strCnt pstCnt
     where 
         replicate0 n = map (\x -> ExInt x) (replicate n 0)
 
------------------
+-----------------Building lambda function from meta data-----------------
 
 evalFunc :: (Meta,Meta,Meta) -> [Expr] 
 evalFunc (MtInCnt i, MtPstSize p, MtFuncs (f:fs))
@@ -80,7 +80,7 @@ getPastVars s i
     | i > 0 = [ExVar (s++".out"++show i)] ++ [ExVar (s++".in"++show i)] ++ getPastVars s (i-1)
     | otherwise = []
 
---------------
+----------Applying Apps to lambda and calling eval--------------------
 -- function     streamInput         oldPast                         newPast
 -- ExLam()      [s1 s2 s3 ..]       [([1,2],[3]) ([2,3],[5])]       [([1,2],[3]) ([2,3],[5])] 
 evalIn :: FuncList -> InputList -> Past -> Past
@@ -104,7 +104,7 @@ buildExpr f is p =  wrapIns f (is++(orderPast p))
         orderPast [] = []
         orderPast (x:xs) = fst x ++ snd x ++ orderPast xs
 
-
+---------Solve lambda with eval------------------------------------
 -- Function to iterate the small step reduction to termination
 evalLoop :: Expr -> Expr 
 evalLoop e = evalLoop' (e,[],[])

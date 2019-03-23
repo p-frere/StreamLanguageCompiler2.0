@@ -1,13 +1,16 @@
---import Tokens
---import Grammar
+--import Tokens for func
+--import Tokens for stream
+--import Grammar for func
+--import Grammar for stram
 --import SLEval
+
 import System.Environment
 import Control.Exception
 import System.IO
 import Control.Monad  
 import Data.Char 
 
-
+---- Add to Grammar then remove-- 
 data Expr = ExInt Int 
             | ExVar String   
             | ExSum Expr Expr 
@@ -28,87 +31,51 @@ data Meta = MtFuncs [Expr]
             | MtPst Past   
             | MtPstSize Int
             | MtInCnt Int
-
--- main :: IO ()
--- main = catch main' noParse
-
-
--- main' = do (fileName : _ ) <- getArgs 
---            sourceText <- readFile fileName
---            getContents
---            --interact test1
---            --putStrLn ("Parsing : " ++ sourceText)
---            --let parsedProg = parseCalc (alexScanTokens sourceText)
---            --putStrLn ("Parsed as " ++ (show parsedProg) ++ "\n")
---            --let result = evalLines (parsedProg)
---            --putStrLn ("Evaluates to " ++ (unparse result))
---            putStrLn ("done")
+-------
 
 f line = putStrLn ("Hi, " ++ line ++ "!")
 
---g :: [Expr] -> IO String
---g m = putStrLn ("Hi, " ++ show m ++"!")
+-- main = do   (fileName : _ ) <- getArgs
+--             let meta = tempMetaEval "fileName"
+--             let func = getFuncs meta
+--             let past = getPast meta
+--             print past
+--             loop
 
-
-main = do
-    (fileName : _ ) <- getArgs
-    hSetBuffering stdout LineBuffering -- or use NoBuffering
-    let meta = tempMetaEval fileName
-    let func = tempFuncEval meta
-    let past = tempPastEval meta
-    putStrLn "Enter some names."
-    input <- getContents
-    let past = tempProecssStream input
-    --mapM_ g (head past)
-    --out <- g (snd (head past))
-    --mapM_ f out
-    mapM_ f (lines input)
-
-main2 = forever $ do  
-    let meta = tempMetaEval "filename"
-    let func = tempFuncEval meta
-    let past = tempPastEval meta
-    putStrLn "Enter some names."
-    l <- getLine
-    let past = tempProecssStream l
-    print (snd (head past))
+-- loop = forever $ do  
+--     l <- getLine
+--     let past = tempProecssStream l
+--     print (snd (head past))
       
+main = do   (fileName : _ ) <- getArgs
+            let meta = tempMetaEval "fileName" -- alex, happy and eval go here
+            let funcs = getFuncs meta 
+            let past = getPast meta
+            forever $ do  
+                l <- getLine
+                let past = tempProecssStream l --evalIn (funcs) (happy alex l) (past) go here
+                print (prettyPrint (snd (head past)))
 
-main1 = forever $ do  
-    putStr "Give me some input: "  
-    l <- getLine  
-    putStrLn $ map toUpper l 
+      
 
 tempProecssStream ::String -> Past
 tempProecssStream s  = [([ExInt 1],[ExInt 1])]
 
 tempMetaEval :: String -> MetaData
-tempMetaEval s = (MtInCnt 1, MtPstSize 1, MtFuncs [ExInt 1])   
+tempMetaEval s = (MtInCnt 1, MtPst [([ExInt 0],[ExInt 0])], MtFuncs [ExInt 1])   
 
-tempFuncEval :: MetaData -> [Expr]
-tempFuncEval m = [(ExInt 0)]
+getFuncs :: MetaData -> [Expr]
+getFuncs (_,_,(MtFuncs fs)) = fs
 
-tempPastEval :: MetaData -> Past
-tempPastEval m = [([ExInt 0],[ExInt 0])]
+getPast :: MetaData -> Past
+getPast (_,(MtPst p),_) = p
 
--- take in 
--- apply f in past
--- get back out past
--- update past
--- print out
-
--- main = do
---     (fileName : _ ) <- getArgs
---     hSetBuffering stdout LineBuffering -- or use NoBuffering
---     putStrLn "Enter some names."
---     input <- getContents
---     let fileName = input
---     mapM_ f (lines input)
+prettyPrint :: [Expr] -> String
+prettyPrint ((ExInt x):xs)
+    | xs /= [] = show x ++ " " ++ prettyPrint xs
+    | ((ExInt x):xs) /= []  = show x
 
 noParse :: ErrorCall -> IO ()
 noParse e = do let err =  show e
                hPutStr stderr err
                return ()
-
-test1 :: String -> String
-test1 s = s
