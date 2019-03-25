@@ -10,7 +10,7 @@ $alpha = [a-zA-Z]
 tokens :-
   $white+                               ; 
   "$".*                                 ; 
-  $digit+                               { tok (\p s -> TokenInt p (read s)) }
+  \-?$digit+                            { tok (\p s -> TokenInt p (read s)) }
   \=                                    { tok (\p s -> TokenEq p ) }
   \+                                    { tok (\p s -> TokenPlus p ) }
   sum                                   { tok (\p s -> TokenPlus p) }
@@ -20,7 +20,7 @@ tokens :-
   mult                                  { tok (\p s -> TokenTimes p) }
   \(                                    { tok (\p s -> TokenLParen p) }
   \)                                    { tok (\p s -> TokenRParen p) }
-  $alpha [$alpha $digit \. \_ \’]*         { tok (\p s -> TokenVar p s) } 
+  $alpha [$alpha $digit \. \_ \’]*      { tok (\p s -> TokenVar p s) } 
   \[                                    { tok (\p s -> TokenLParenSq p) }
   \]                                    { tok (\p s -> TokenRParenSq p) }
   \,                                    { tok (\p s -> TokenSeq p ) }

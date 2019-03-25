@@ -5,7 +5,7 @@ import Tokens
 import Grammar 
 --for func
 --import Grammar for stram
---import SLEval
+import SLEval
 
 import System.Environment
 import Control.Exception
