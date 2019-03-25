@@ -1,17 +1,17 @@
-
-data Expr = ExInt Int 
-            | ExVar String   
-            | ExSum Expr Expr 
-            | ExSub Expr Expr 
-            | ExMult Expr Expr  
-            | Cl String Expr Environment
-            | ExApp Expr Expr
-            | ExLam String Expr
-            | ExLet String Expr Expr deriving (Show,Eq)
+module SLEval where
+    import Grammar
+--data Expr = ExInt Int 
+--            | ExVar String   
+--            | ExSum Expr Expr 
+--            | ExSub Expr Expr 
 --            | ExMult Expr Expr  
+--            | Cl String Expr Environment
+--            | ExApp Expr Expr
+--            | ExLam String Expr
+--            | ExLet String Expr Expr deriving (Show,Eq)
 
 type Configuration = (Expr,Environment,Kontinuation)
-type Environment = [ (String,Expr) ] 
+--type Environment = [ (String,Expr) ] 
 
 -- Holds the expresion in the kontinuation in a partially evaluated form
 data Frame =    SumH_ Expr Environment | Sum_H Expr
@@ -23,18 +23,18 @@ data Frame =    SumH_ Expr Environment | Sum_H Expr
 type Kontinuation = [ Frame ]
 type State = (Expr,Environment,Kontinuation)
 
-type Mapping = ([Expr],[Expr])
-type Past = [Mapping]
-type FuncList = [Expr]
-type InputList = [Expr]
+--type Mapping = ([Expr],[Expr])
+--type Past = [Mapping]
+--type FuncList = [Expr]
+--type InputList = [Expr]
 
 -- cnt past func
-type MetaData = (Meta, Meta, Meta)
+--type MetaData = (Meta, Meta, Meta)
 
-data Meta = MtFuncs [Expr] 
-            | MtPst Past   
-            | MtPstSize Int
-            | MtInCnt Int
+--data Meta = MtFuncs [Expr] 
+--            | MtPst Past   
+--            | MtPstSize Int
+--            | MtInCnt Int
 ----------------past processing-------------------------
 
 getPast :: (Meta,Meta,Meta) -> Past
