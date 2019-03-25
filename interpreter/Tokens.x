@@ -20,7 +20,7 @@ tokens :-
   mult                                  { tok (\p s -> TokenTimes p) }
   \(                                    { tok (\p s -> TokenLParen p) }
   \)                                    { tok (\p s -> TokenRParen p) }
-  $alpha [$alpha $digit \_ \’]*         { tok (\p s -> TokenVar p s) } 
+  $alpha [$alpha $digit \. \_ \’]*         { tok (\p s -> TokenVar p s) } 
   \[                                    { tok (\p s -> TokenLParenSq p) }
   \]                                    { tok (\p s -> TokenRParenSq p) }
   \,                                    { tok (\p s -> TokenSeq p ) }
@@ -30,11 +30,8 @@ tokens :-
   lam                                   { tok (\p s -> TokenLam p) }
   set                                   { tok (\p s -> TokenSet p) }
   past                                  { tok (\p s -> TokenPast p) }
-  pastCount                             { tok (\p s -> TokenPastCount p s) }
-  inStreamCount                         { tok (\p s -> TokenPastCount p s) }
-  in$digit+                             { tok (\p s -> TokenPastCount p s) }
-  out$digit+                            { tok (\p s -> TokenPastCount p s) }
-  s$digit+                              { tok (\p s -> TokenPastCount p s) }
+  pastCount                             { tok (\p s -> TokenPastCount p) }
+  inStreamCount                         { tok (\p s -> TokenInStreamCount p) }
 
 
 
@@ -44,20 +41,24 @@ tok f p s = f p s
 
 -- The token type: 
 data Token =
-  TokenInt        AlexPosn Int    |
-  TokenEq         AlexPosn        |
-  TokenPlus       AlexPosn        |
-  TokenMinus      AlexPosn        |
-  TokenTimes      AlexPosn        |
-  TokenLParen     AlexPosn        |
-  TokenRParen     AlexPosn        |
-  TokenLParenSq   AlexPosn        |
-  TokenRParenSq   AlexPosn        |
-  TokenSeq        AlexPosn        |
-  TokenLet        AlexPosn        |
-  TokenIn         AlexPosn        |
-  TokenLam        AlexPosn        |
-  TokenVar        AlexPosn String
+  TokenInt              AlexPosn Int    |
+  TokenEq               AlexPosn        |
+  TokenPlus             AlexPosn        |
+  TokenMinus            AlexPosn        |
+  TokenTimes            AlexPosn        |
+  TokenLParen           AlexPosn        |
+  TokenRParen           AlexPosn        |
+  TokenLParenSq         AlexPosn        |
+  TokenRParenSq         AlexPosn        |
+  TokenSeq              AlexPosn        |
+  TokenLet              AlexPosn        |
+  TokenIn               AlexPosn        |
+  TokenLam              AlexPosn        |
+  TokenSet              AlexPosn        |
+  TokenPast             AlexPosn        |
+  TokenPastCount        AlexPosn        |
+  TokenInStreamCount    AlexPosn        |
+  TokenVar              AlexPosn String 
   deriving (Eq,Show) 
 
 
@@ -76,4 +77,7 @@ tokenPosn (TokenLet (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
 tokenPosn (TokenIn (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
 tokenPosn (TokenLam (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
 tokenPosn (TokenVar (AlexPn a l c) _) = show(l) ++ ":" ++ show(c)
+tokenPosn (TokenPast (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
+tokenPosn (TokenPastCount (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
+tokenPosn (TokenInStreamCount (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
 }
