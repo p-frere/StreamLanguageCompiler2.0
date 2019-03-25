@@ -8,6 +8,7 @@ data Expr = ExInt Int
             | ExApp Expr Expr
             | ExLam String Expr
             | ExLet String Expr Expr deriving (Show,Eq)
+--            | ExMult Expr Expr  
 
 type Configuration = (Expr,Environment,Kontinuation)
 type Environment = [ (String,Expr) ] 
