@@ -10,7 +10,7 @@ $eol   = [\n]
 
 tokens :-
   "$".*                             ; 
-  $eol                              ;
+  $eol                              { tok (\p s -> TokenEndLine p )}
   $white+                           ; 
   \-?$digit+                        { tok (\p s -> TokenInt p (read s)) }
   \=                                { tok (\p s -> TokenEq p )}
@@ -34,7 +34,7 @@ tokens :-
   past                              { tok (\p s -> TokenPast p) }
   pastCount                         { tok (\p s -> TokenPastCount p) }
   inStreamCount                     { tok (\p s -> TokenInStreamCount p) }
-
+  app                               { tok (\p s -> TokenApp p) }
 
 
 { 
@@ -61,6 +61,7 @@ data Token =
   TokenPast          AlexPosn       |
   TokenPastCount     AlexPosn       |
   TokenInStreamCount AlexPosn       |
+  TokenEndLine       AlexPosn       |
   TokenVar           AlexPosn String
   deriving (Eq,Show) 
 
@@ -83,4 +84,6 @@ tokenPosn (TokenVar (AlexPn a l c) _) = show(l) ++ ":" ++ show(c)
 tokenPosn (TokenPast (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
 tokenPosn (TokenPastCount (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
 tokenPosn (TokenInStreamCount (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
+tokenPosn (TokenEndLine (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
+tokenPosn (TokenApp (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
 }

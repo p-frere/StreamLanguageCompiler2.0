@@ -4300,7 +4300,7 @@ alex_accept = listArray (0 :: Int, 34)
   , AlexAccNone
   , AlexAccNone
   , AlexAccSkip
-  , AlexAccSkip
+  , AlexAcc 20
   , AlexAccSkip
   , AlexAcc 19
   , AlexAcc 18
@@ -4324,8 +4324,9 @@ alex_accept = listArray (0 :: Int, 34)
   , AlexAcc 0
   ]
 
-alex_actions = array (0 :: Int, 20)
-  [ (19,alex_action_3)
+alex_actions = array (0 :: Int, 21)
+  [ (20,alex_action_1)
+  , (19,alex_action_3)
   , (18,alex_action_4)
   , (17,alex_action_5)
   , (16,alex_action_6)
@@ -4372,6 +4373,7 @@ data Token =
   TokenPast          AlexPosn       |
   TokenPastCount     AlexPosn       |
   TokenInStreamCount AlexPosn       |
+  TokenEndLine       AlexPosn       |
   TokenVar           AlexPosn String
   deriving (Eq,Show) 
 
@@ -4394,7 +4396,10 @@ tokenPosn (TokenVar (AlexPn a l c) _) = show(l) ++ ":" ++ show(c)
 tokenPosn (TokenPast (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
 tokenPosn (TokenPastCount (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
 tokenPosn (TokenInStreamCount (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
+tokenPosn (TokenEndLine (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
+tokenPosn (TokenApp (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
 
+alex_action_1 =  tok (\p s -> TokenEndLine p )
 alex_action_3 =  tok (\p s -> TokenInt p (read s)) 
 alex_action_4 =  tok (\p s -> TokenEq p )
 alex_action_5 =  tok (\p s -> TokenPlus p ) 
@@ -4417,6 +4422,7 @@ alex_action_21 =  tok (\p s -> TokenSet p)
 alex_action_22 =  tok (\p s -> TokenPast p) 
 alex_action_23 =  tok (\p s -> TokenPastCount p) 
 alex_action_24 =  tok (\p s -> TokenInStreamCount p) 
+alex_action_25 =  tok (\p s -> TokenApp p) 
 {-# LINE 1 "templates/GenericTemplate.hs" #-}
 -- -----------------------------------------------------------------------------
 -- ALEX TEMPLATE

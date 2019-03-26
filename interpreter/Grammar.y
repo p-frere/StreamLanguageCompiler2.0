@@ -25,12 +25,13 @@ import Tokens
    past     { TokenPast _ }
    pastCnt  { TokenPastCount _ }
    SCount   { TokenInStreamCount _ }
+   eol      { TokenEndLine _ }
+   app      { TokenApp _ }
 
 %nonassoc int var '(' ')' '[' ']' in 
 %left '+' '-'
 %left '*' 
-%left lam let
-%left APP
+%right lam let app
 
 %%
 
@@ -51,9 +52,10 @@ Expr : '(' Expr ')'                  { $2 }
      | '-' '(' Expr ',' Expr ')'     { ExSub ($3) ($5) }  
      | Expr '*' Expr                 { ExMult ($1) ($3) } 
      | '*' '(' Expr ',' Expr ')'     { ExMult ($3) ($5) }
-     | Expr Expr %prec APP           { ExApp ($1) ($2) }
+     | app '(' Expr ',' Expr ')'     { ExApp ($3) ($5) }
      | lam var '(' Expr ')'          { ExLam ($2) ($4) }
      | let var '=' Expr in Expr      { ExLet $2 $4 $6 }
+     | Expr eol Expr                 { $1, $3 }
 
 MappingExps : MappingExps ',' MappingExp            { $3 : $1 }
             | MappingExp                            { [$1] }
