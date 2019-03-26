@@ -7,24 +7,24 @@ import Tokens
 %tokentype { Token } 
 %error { parseError }
 %token 
-   int             { TokenInt _ $$ }
-   '='             { TokenEq _ }
-   '+'             { TokenPlus _ }
-   '-'             { TokenMinus _ }
-   '*'             { TokenTimes _ }
-   '('             { TokenLParen _ }
-   ')'             { TokenRParen _ }
-   '['             { TokenLParenSq _ }
-   ']'             { TokenRParenSq _ }
-   ','             { TokenSeq _ }
-   let             { TokenLet _ }
-   in              { TokenIn _ }
-   var             { TokenVar _ $$ }
-   lam             { TokenLam _ }
-   set             { TokenSet _ }
-   past            { TokenPast _ }
-   pastCnt         { TokenPastCount _ }
-   SCount          { TokenInStreamCount _ }
+   int      { TokenInt _ $$ }
+   '='      { TokenEq _ }
+   '+'      { TokenPlus _ }
+   '-'      { TokenMinus _ }
+   '*'      { TokenTimes _ }
+   '('      { TokenLParen _ }
+   ')'      { TokenRParen _ }
+   '['      { TokenLParenSq _ }
+   ']'      { TokenRParenSq _ }
+   ','      { TokenSeq _ }
+   let      { TokenLet _ }
+   in       { TokenIn _ }
+   var      { TokenVar _ $$ }
+   lam      { TokenLam _ }
+   set      { TokenSet _ }
+   past     { TokenPast _ }
+   pastCnt  { TokenPastCount _ }
+   SCount   { TokenInStreamCount _ }
 
 %nonassoc int var '(' ')' '[' ']' in 
 %left '+' '-'
@@ -34,12 +34,13 @@ import Tokens
 
 %%
 
-MetaData : '['Meta']' '['Meta']' '['Meta']'         { ($2, $5, $8) }
+Exp : Meta Meta Meta                { MtData ($1, $2, $3) }
+    | IntExprs                      { InList $1 }  
 
-Meta : past '=' '[' MappingExps ']'  { MtPst $4 }
-     | pastCnt '=' int               { MtPstSize $3 }  
-     | SCount '=' '(' int ')'        { MtInCnt $4 }
-     | Expr                          { MtFuncs [$1] } 
+Meta : set past '=' '[' MappingExps ']'  { MtPst $5 }
+     | set pastCnt '=' int               { MtPstSize $4 }  
+     | set SCount '=' int                { MtInCnt $4 }
+     | Expr                              { MtFuncs [$1] }
 
 Expr : '(' Expr ')'                  { $2 }
      | int                           { ExInt $1 }
@@ -60,6 +61,9 @@ MappingExp : '(''[' Exprs ']' ',' '[' Exprs ']'')'  { ($3 , $7) }
 Exprs : Exprs ',' Expr                              { $3 : $1 }
       | Expr                                        { [$1] }
 
+IntExprs : Expr           { [$1] }
+         | IntExprs Expr  { $2 : $1 }
+
 
 { 
 parseError :: [Token] -> a
@@ -72,8 +76,10 @@ type Mapping = ([Expr],[Expr])
 type Past = [Mapping]
 type FuncList = [Expr]
 type InputList = [Expr]
-
 type MetaData = (Meta, Meta, Meta)
+
+data Exp = MtData MetaData
+         | InList InputList
 
 data Meta = MtFuncs [Expr]
           | MtPst Past 

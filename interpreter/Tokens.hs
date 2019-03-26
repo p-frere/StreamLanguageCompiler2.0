@@ -4367,6 +4367,7 @@ data Token =
   TokenLet           AlexPosn       |
   TokenIn            AlexPosn       |
   TokenLam           AlexPosn       |
+  TokenApp           AlexPosn       |
   TokenSet           AlexPosn       |
   TokenPast          AlexPosn       |
   TokenPastCount     AlexPosn       |
@@ -4395,7 +4396,7 @@ tokenPosn (TokenPastCount (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
 tokenPosn (TokenInStreamCount (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
 
 alex_action_3 =  tok (\p s -> TokenInt p (read s)) 
-alex_action_4 =  tok (\p s -> TokenEq p) 
+alex_action_4 =  tok (\p s -> TokenEq p )
 alex_action_5 =  tok (\p s -> TokenPlus p ) 
 alex_action_6 =  tok (\p s -> TokenPlus p) 
 alex_action_7 =  tok (\p s -> TokenMinus p ) 

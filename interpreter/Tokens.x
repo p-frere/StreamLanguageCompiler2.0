@@ -13,7 +13,7 @@ tokens :-
   $eol                              ;
   $white+                           ; 
   \-?$digit+                        { tok (\p s -> TokenInt p (read s)) }
-  \=                                { tok (\p s -> TokenEq p) }
+  \=                                { tok (\p s -> TokenEq p )}
   \+                                { tok (\p s -> TokenPlus p ) }
   sum                               { tok (\p s -> TokenPlus p) }
   \-                                { tok (\p s -> TokenMinus p ) }
@@ -56,6 +56,7 @@ data Token =
   TokenLet           AlexPosn       |
   TokenIn            AlexPosn       |
   TokenLam           AlexPosn       |
+  TokenApp           AlexPosn       |
   TokenSet           AlexPosn       |
   TokenPast          AlexPosn       |
   TokenPastCount     AlexPosn       |

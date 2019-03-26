@@ -1,5 +1,6 @@
 module SLEval where
 import Grammar
+--import GrammarStream
 --data Expr = ExInt Int 
 --            | ExVar String   
 --            | ExSum Expr Expr 
@@ -37,9 +38,13 @@ type State = (Expr,Environment,Kontinuation)
 --            | MtInCnt Int
 ----------------past processing-------------------------
 
-getPast :: (Meta,Meta,Meta) -> Past
-getPast (MtPstSize s, MtPstSize p, f) = generatePast s p
-getPast (s, MtPst p, f) = p
+--getPast :: (Meta,Meta,Meta) -> Past
+--getPast (MtPstSize s, MtPstSize p, f) = generatePast s p
+--getPast (s, MtPst p, f) = p
+
+getPast :: Exp -> Past
+getPast (MtData(MtPstSize s, MtPstSize p, f)) = generatePast s p
+getPast (MtData(s, MtPst p, f)) = p
 
 generatePast :: Int -> Int  -> Past
 generatePast strCnt pstCnt
@@ -84,8 +89,8 @@ getPastVars s i
 ----------Applying Apps to lambda and calling eval--------------------
 -- function     streamInput         oldPast                         newPast
 -- ExLam()      [s1 s2 s3 ..]       [([1,2],[3]) ([2,3],[5])]       [([1,2],[3]) ([2,3],[5])] 
-evalIn :: FuncList -> InputList -> Past -> Past
-evalIn fs is p = updatePast is [evalLoop (buildExpr f is p)| f <- fs] p
+evalIn :: FuncList -> Exp -> Past -> Past
+evalIn fs (InList is) p = updatePast is [evalLoop (buildExpr f is p)| f <- fs] p
 
 -- add new pairing to past window
 --              ins         outs    oldPAst newPast

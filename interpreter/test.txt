@@ -1,2 +1,1 @@
-set inStreamCount = 2
-set pastCount = 0
+1 2 3
