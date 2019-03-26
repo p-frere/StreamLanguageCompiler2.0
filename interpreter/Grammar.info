@@ -10,29 +10,27 @@ Grammar
 -----------------------------------------------------------------------------
 	%start_parseCalc -> MetaData                       (0)
 	MetaData -> '[' Meta ']' '[' Meta ']' '[' Meta ']'   (1)
-	Meta -> Exp                                        (2)
-	Meta -> Expr                                       (3)
-	Exp -> past PastExp                                (4)
-	Exp -> inStreamCount '=' int                       (5)
-	Exp -> pastCount '=' int                           (6)
-	Expr -> '(' Expr ')'                               (7)
-	Expr -> int                                        (8)
-	Expr -> var                                        (9)
-	Expr -> Expr '+' Expr                              (10)
-	Expr -> sum '(' Expr ',' Expr ')'                  (11)
-	Expr -> Expr '-' Expr                              (12)
-	Expr -> sub '(' Expr ',' Expr ')'                  (13)
-	Expr -> Expr '*' Expr                              (14)
-	Expr -> mult '(' Expr ',' Expr ')'                 (15)
-	Expr -> Expr Expr                                  (16)
-	Expr -> lam var '(' Expr ')'                       (17)
-	Expr -> let var '=' Expr in Expr                   (18)
-	PastExp -> '[' MappingExps ']'                     (19)
-	MappingExps -> MappingExps ',' MappingExp          (20)
-	MappingExps -> MappingExp                          (21)
-	MappingExp -> '(' '[' Exprs ']' ',' '[' Exprs ']' ')'   (22)
-	Exprs -> Exprs ',' Expr                            (23)
-	Exprs -> Expr                                      (24)
+	Meta -> past '=' '[' MappingExps ']'               (2)
+	Meta -> pastCnt '=' int                            (3)
+	Meta -> SCount '=' '(' int ')'                     (4)
+	Meta -> Expr                                       (5)
+	Expr -> '(' Expr ')'                               (6)
+	Expr -> int                                        (7)
+	Expr -> var                                        (8)
+	Expr -> Expr '+' Expr                              (9)
+	Expr -> '+' '(' Expr ',' Expr ')'                  (10)
+	Expr -> Expr '-' Expr                              (11)
+	Expr -> '-' '(' Expr ',' Expr ')'                  (12)
+	Expr -> Expr '*' Expr                              (13)
+	Expr -> '*' '(' Expr ',' Expr ')'                  (14)
+	Expr -> Expr Expr                                  (15)
+	Expr -> lam var '(' Expr ')'                       (16)
+	Expr -> let var '=' Expr in Expr                   (17)
+	MappingExps -> MappingExps ',' MappingExp          (18)
+	MappingExps -> MappingExp                          (19)
+	MappingExp -> '(' '[' Exprs ']' ',' '[' Exprs ']' ')'   (20)
+	Exprs -> Exprs ',' Expr                            (21)
+	Exprs -> Expr                                      (22)
 
 -----------------------------------------------------------------------------
 Terminals
@@ -40,11 +38,8 @@ Terminals
 	int            { TokenInt _ $$ }
 	'='            { TokenEq _ }
 	'+'            { TokenPlus _ }
-	sum            { TokenPlus _ }
 	'-'            { TokenMinus _ }
-	sub            { TokenMinus _ }
 	'*'            { TokenTimes _ }
-	mult           { TokenTimes _ }
 	'('            { TokenLParen _ }
 	')'            { TokenRParen _ }
 	'['            { TokenLParenSq _ }
@@ -56,21 +51,19 @@ Terminals
 	lam            { TokenLam _ }
 	set            { TokenSet _ }
 	past           { TokenPast _ }
-	pastCount      { TokenPastCount _ }
-	inStreamCount  { TokenInStreamCount _ }
+	pastCnt        { TokenPastCount _ }
+	SCount         { TokenInStreamCount _ }
 
 -----------------------------------------------------------------------------
 Non-terminals
 -----------------------------------------------------------------------------
 	%start_parseCalc rule  0
 	MetaData        rule  1
-	Meta            rules 2, 3
-	Exp             rules 4, 5, 6
-	Expr            rules 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18
-	PastExp         rule  19
-	MappingExps     rules 20, 21
-	MappingExp      rule  22
-	Exprs           rules 23, 24
+	Meta            rules 2, 3, 4, 5
+	Expr            rules 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17
+	MappingExps     rules 18, 19
+	MappingExp      rule  20
+	Exprs           rules 21, 22
 
 -----------------------------------------------------------------------------
 States
@@ -92,21 +85,20 @@ State 2
 
 	MetaData -> '[' . Meta ']' '[' Meta ']' '[' Meta ']'    (rule 1)
 
-	int            shift, and enter state 7
-	sum            shift, and enter state 8
-	sub            shift, and enter state 9
-	mult           shift, and enter state 10
-	'('            shift, and enter state 11
-	let            shift, and enter state 12
-	var            shift, and enter state 13
-	lam            shift, and enter state 14
-	past           shift, and enter state 15
-	pastCount      shift, and enter state 16
-	inStreamCount  shift, and enter state 17
+	int            shift, and enter state 6
+	'+'            shift, and enter state 7
+	'-'            shift, and enter state 8
+	'*'            shift, and enter state 9
+	'('            shift, and enter state 10
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+	past           shift, and enter state 14
+	pastCnt        shift, and enter state 15
+	SCount         shift, and enter state 16
 
 	Meta           goto state 4
-	Exp            goto state 5
-	Expr           goto state 6
+	Expr           goto state 5
 
 State 3
 
@@ -119,521 +111,37 @@ State 4
 
 	MetaData -> '[' Meta . ']' '[' Meta ']' '[' Meta ']'    (rule 1)
 
-	']'            shift, and enter state 32
+	']'            shift, and enter state 30
 
 
 State 5
 
-	Meta -> Exp .                                       (rule 2)
+	Meta -> Expr .                                      (rule 5)
+	Expr -> Expr . '+' Expr                             (rule 9)
+	Expr -> Expr . '-' Expr                             (rule 11)
+	Expr -> Expr . '*' Expr                             (rule 13)
+	Expr -> Expr . Expr                                 (rule 15)
 
-	']'            reduce using rule 2
+	int            shift, and enter state 6
+	'+'            shift, and enter state 27
+	'-'            shift, and enter state 28
+	'*'            shift, and enter state 29
+	'('            shift, and enter state 10
+	']'            reduce using rule 5
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
 
+	Expr           goto state 26
 
 State 6
 
-	Meta -> Expr .                                      (rule 3)
-	Expr -> Expr . '+' Expr                             (rule 10)
-	Expr -> Expr . '-' Expr                             (rule 12)
-	Expr -> Expr . '*' Expr                             (rule 14)
-	Expr -> Expr . Expr                                 (rule 16)
-
-	int            shift, and enter state 7
-	'+'            shift, and enter state 29
-	sum            shift, and enter state 8
-	'-'            shift, and enter state 30
-	sub            shift, and enter state 9
-	'*'            shift, and enter state 31
-	mult           shift, and enter state 10
-	'('            shift, and enter state 11
-	']'            reduce using rule 3
-	let            shift, and enter state 12
-	var            shift, and enter state 13
-	lam            shift, and enter state 14
-
-	Expr           goto state 28
-
-State 7
-
-	Expr -> int .                                       (rule 8)
-
-	int            reduce using rule 8
-	'+'            reduce using rule 8
-	sum            reduce using rule 8
-	'-'            reduce using rule 8
-	sub            reduce using rule 8
-	'*'            reduce using rule 8
-	mult           reduce using rule 8
-	'('            reduce using rule 8
-	')'            reduce using rule 8
-	']'            reduce using rule 8
-	','            reduce using rule 8
-	let            reduce using rule 8
-	in             reduce using rule 8
-	var            reduce using rule 8
-	lam            reduce using rule 8
-
-
-State 8
-
-	Expr -> sum . '(' Expr ',' Expr ')'                 (rule 11)
-
-	'('            shift, and enter state 27
-
-
-State 9
-
-	Expr -> sub . '(' Expr ',' Expr ')'                 (rule 13)
-
-	'('            shift, and enter state 26
-
-
-State 10
-
-	Expr -> mult . '(' Expr ',' Expr ')'                (rule 15)
-
-	'('            shift, and enter state 25
-
-
-State 11
-
-	Expr -> '(' . Expr ')'                              (rule 7)
-
-	int            shift, and enter state 7
-	sum            shift, and enter state 8
-	sub            shift, and enter state 9
-	mult           shift, and enter state 10
-	'('            shift, and enter state 11
-	let            shift, and enter state 12
-	var            shift, and enter state 13
-	lam            shift, and enter state 14
-
-	Expr           goto state 24
-
-State 12
-
-	Expr -> let . var '=' Expr in Expr                  (rule 18)
-
-	var            shift, and enter state 23
-
-
-State 13
-
-	Expr -> var .                                       (rule 9)
-
-	int            reduce using rule 9
-	'+'            reduce using rule 9
-	sum            reduce using rule 9
-	'-'            reduce using rule 9
-	sub            reduce using rule 9
-	'*'            reduce using rule 9
-	mult           reduce using rule 9
-	'('            reduce using rule 9
-	')'            reduce using rule 9
-	']'            reduce using rule 9
-	','            reduce using rule 9
-	let            reduce using rule 9
-	in             reduce using rule 9
-	var            reduce using rule 9
-	lam            reduce using rule 9
-
-
-State 14
-
-	Expr -> lam . var '(' Expr ')'                      (rule 17)
-
-	var            shift, and enter state 22
-
-
-State 15
-
-	Exp -> past . PastExp                               (rule 4)
-
-	'['            shift, and enter state 21
-
-	PastExp        goto state 20
-
-State 16
-
-	Exp -> pastCount . '=' int                          (rule 6)
-
-	'='            shift, and enter state 19
-
-
-State 17
-
-	Exp -> inStreamCount . '=' int                      (rule 5)
-
-	'='            shift, and enter state 18
-
-
-State 18
-
-	Exp -> inStreamCount '=' . int                      (rule 5)
-
-	int            shift, and enter state 47
-
-
-State 19
-
-	Exp -> pastCount '=' . int                          (rule 6)
-
-	int            shift, and enter state 46
-
-
-State 20
-
-	Exp -> past PastExp .                               (rule 4)
-
-	']'            reduce using rule 4
-
-
-State 21
-
-	PastExp -> '[' . MappingExps ']'                    (rule 19)
-
-	'('            shift, and enter state 45
-
-	MappingExps    goto state 43
-	MappingExp     goto state 44
-
-State 22
-
-	Expr -> lam var . '(' Expr ')'                      (rule 17)
-
-	'('            shift, and enter state 42
-
-
-State 23
-
-	Expr -> let var . '=' Expr in Expr                  (rule 18)
-
-	'='            shift, and enter state 41
-
-
-State 24
-
-	Expr -> '(' Expr . ')'                              (rule 7)
-	Expr -> Expr . '+' Expr                             (rule 10)
-	Expr -> Expr . '-' Expr                             (rule 12)
-	Expr -> Expr . '*' Expr                             (rule 14)
-	Expr -> Expr . Expr                                 (rule 16)
-
-	int            shift, and enter state 7
-	'+'            shift, and enter state 29
-	sum            shift, and enter state 8
-	'-'            shift, and enter state 30
-	sub            shift, and enter state 9
-	'*'            shift, and enter state 31
-	mult           shift, and enter state 10
-	'('            shift, and enter state 11
-	')'            shift, and enter state 40
-	let            shift, and enter state 12
-	var            shift, and enter state 13
-	lam            shift, and enter state 14
-
-	Expr           goto state 28
-
-State 25
-
-	Expr -> mult '(' . Expr ',' Expr ')'                (rule 15)
-
-	int            shift, and enter state 7
-	sum            shift, and enter state 8
-	sub            shift, and enter state 9
-	mult           shift, and enter state 10
-	'('            shift, and enter state 11
-	let            shift, and enter state 12
-	var            shift, and enter state 13
-	lam            shift, and enter state 14
-
-	Expr           goto state 39
-
-State 26
-
-	Expr -> sub '(' . Expr ',' Expr ')'                 (rule 13)
-
-	int            shift, and enter state 7
-	sum            shift, and enter state 8
-	sub            shift, and enter state 9
-	mult           shift, and enter state 10
-	'('            shift, and enter state 11
-	let            shift, and enter state 12
-	var            shift, and enter state 13
-	lam            shift, and enter state 14
-
-	Expr           goto state 38
-
-State 27
-
-	Expr -> sum '(' . Expr ',' Expr ')'                 (rule 11)
-
-	int            shift, and enter state 7
-	sum            shift, and enter state 8
-	sub            shift, and enter state 9
-	mult           shift, and enter state 10
-	'('            shift, and enter state 11
-	let            shift, and enter state 12
-	var            shift, and enter state 13
-	lam            shift, and enter state 14
-
-	Expr           goto state 37
-
-State 28
-
-	Expr -> Expr . '+' Expr                             (rule 10)
-	Expr -> Expr . '-' Expr                             (rule 12)
-	Expr -> Expr . '*' Expr                             (rule 14)
-	Expr -> Expr . Expr                                 (rule 16)
-	Expr -> Expr Expr .                                 (rule 16)
-
-	int            reduce using rule 16
-	'+'            reduce using rule 16
-	sum            reduce using rule 16
-	'-'            reduce using rule 16
-	sub            reduce using rule 16
-	'*'            reduce using rule 16
-	mult           reduce using rule 16
-	'('            reduce using rule 16
-	')'            reduce using rule 16
-	']'            reduce using rule 16
-	','            reduce using rule 16
-	let            reduce using rule 16
-	in             reduce using rule 16
-	var            reduce using rule 16
-	lam            reduce using rule 16
-
-	Expr           goto state 28
-
-State 29
-
-	Expr -> Expr '+' . Expr                             (rule 10)
-
-	int            shift, and enter state 7
-	sum            shift, and enter state 8
-	sub            shift, and enter state 9
-	mult           shift, and enter state 10
-	'('            shift, and enter state 11
-	let            shift, and enter state 12
-	var            shift, and enter state 13
-	lam            shift, and enter state 14
-
-	Expr           goto state 36
-
-State 30
-
-	Expr -> Expr '-' . Expr                             (rule 12)
-
-	int            shift, and enter state 7
-	sum            shift, and enter state 8
-	sub            shift, and enter state 9
-	mult           shift, and enter state 10
-	'('            shift, and enter state 11
-	let            shift, and enter state 12
-	var            shift, and enter state 13
-	lam            shift, and enter state 14
-
-	Expr           goto state 35
-
-State 31
-
-	Expr -> Expr '*' . Expr                             (rule 14)
-
-	int            shift, and enter state 7
-	sum            shift, and enter state 8
-	sub            shift, and enter state 9
-	mult           shift, and enter state 10
-	'('            shift, and enter state 11
-	let            shift, and enter state 12
-	var            shift, and enter state 13
-	lam            shift, and enter state 14
-
-	Expr           goto state 34
-
-State 32
-
-	MetaData -> '[' Meta ']' . '[' Meta ']' '[' Meta ']'    (rule 1)
-
-	'['            shift, and enter state 33
-
-
-State 33
-
-	MetaData -> '[' Meta ']' '[' . Meta ']' '[' Meta ']'    (rule 1)
-
-	int            shift, and enter state 7
-	sum            shift, and enter state 8
-	sub            shift, and enter state 9
-	mult           shift, and enter state 10
-	'('            shift, and enter state 11
-	let            shift, and enter state 12
-	var            shift, and enter state 13
-	lam            shift, and enter state 14
-	past           shift, and enter state 15
-	pastCount      shift, and enter state 16
-	inStreamCount  shift, and enter state 17
-
-	Meta           goto state 56
-	Exp            goto state 5
-	Expr           goto state 6
-
-State 34
-
-	Expr -> Expr . '+' Expr                             (rule 10)
-	Expr -> Expr . '-' Expr                             (rule 12)
-	Expr -> Expr . '*' Expr                             (rule 14)
-	Expr -> Expr '*' Expr .                             (rule 14)
-	Expr -> Expr . Expr                                 (rule 16)
-
-	int            reduce using rule 14
-	'+'            reduce using rule 14
-	sum            reduce using rule 14
-	'-'            reduce using rule 14
-	sub            reduce using rule 14
-	'*'            reduce using rule 14
-	mult           reduce using rule 14
-	'('            reduce using rule 14
-	')'            reduce using rule 14
-	']'            reduce using rule 14
-	','            reduce using rule 14
-	let            shift, and enter state 12
-	in             reduce using rule 14
-	var            reduce using rule 14
-	lam            shift, and enter state 14
-
-	Expr           goto state 28
-
-State 35
-
-	Expr -> Expr . '+' Expr                             (rule 10)
-	Expr -> Expr . '-' Expr                             (rule 12)
-	Expr -> Expr '-' Expr .                             (rule 12)
-	Expr -> Expr . '*' Expr                             (rule 14)
-	Expr -> Expr . Expr                                 (rule 16)
-
-	int            reduce using rule 12
-	'+'            reduce using rule 12
-	sum            reduce using rule 12
-	'-'            reduce using rule 12
-	sub            reduce using rule 12
-	'*'            shift, and enter state 31
-	mult           shift, and enter state 10
-	'('            reduce using rule 12
-	')'            reduce using rule 12
-	']'            reduce using rule 12
-	','            reduce using rule 12
-	let            shift, and enter state 12
-	in             reduce using rule 12
-	var            reduce using rule 12
-	lam            shift, and enter state 14
-
-	Expr           goto state 28
-
-State 36
-
-	Expr -> Expr . '+' Expr                             (rule 10)
-	Expr -> Expr '+' Expr .                             (rule 10)
-	Expr -> Expr . '-' Expr                             (rule 12)
-	Expr -> Expr . '*' Expr                             (rule 14)
-	Expr -> Expr . Expr                                 (rule 16)
-
-	int            reduce using rule 10
-	'+'            reduce using rule 10
-	sum            reduce using rule 10
-	'-'            reduce using rule 10
-	sub            reduce using rule 10
-	'*'            shift, and enter state 31
-	mult           shift, and enter state 10
-	'('            reduce using rule 10
-	')'            reduce using rule 10
-	']'            reduce using rule 10
-	','            reduce using rule 10
-	let            shift, and enter state 12
-	in             reduce using rule 10
-	var            reduce using rule 10
-	lam            shift, and enter state 14
-
-	Expr           goto state 28
-
-State 37
-
-	Expr -> Expr . '+' Expr                             (rule 10)
-	Expr -> sum '(' Expr . ',' Expr ')'                 (rule 11)
-	Expr -> Expr . '-' Expr                             (rule 12)
-	Expr -> Expr . '*' Expr                             (rule 14)
-	Expr -> Expr . Expr                                 (rule 16)
-
-	int            shift, and enter state 7
-	'+'            shift, and enter state 29
-	sum            shift, and enter state 8
-	'-'            shift, and enter state 30
-	sub            shift, and enter state 9
-	'*'            shift, and enter state 31
-	mult           shift, and enter state 10
-	'('            shift, and enter state 11
-	','            shift, and enter state 55
-	let            shift, and enter state 12
-	var            shift, and enter state 13
-	lam            shift, and enter state 14
-
-	Expr           goto state 28
-
-State 38
-
-	Expr -> Expr . '+' Expr                             (rule 10)
-	Expr -> Expr . '-' Expr                             (rule 12)
-	Expr -> sub '(' Expr . ',' Expr ')'                 (rule 13)
-	Expr -> Expr . '*' Expr                             (rule 14)
-	Expr -> Expr . Expr                                 (rule 16)
-
-	int            shift, and enter state 7
-	'+'            shift, and enter state 29
-	sum            shift, and enter state 8
-	'-'            shift, and enter state 30
-	sub            shift, and enter state 9
-	'*'            shift, and enter state 31
-	mult           shift, and enter state 10
-	'('            shift, and enter state 11
-	','            shift, and enter state 54
-	let            shift, and enter state 12
-	var            shift, and enter state 13
-	lam            shift, and enter state 14
-
-	Expr           goto state 28
-
-State 39
-
-	Expr -> Expr . '+' Expr                             (rule 10)
-	Expr -> Expr . '-' Expr                             (rule 12)
-	Expr -> Expr . '*' Expr                             (rule 14)
-	Expr -> mult '(' Expr . ',' Expr ')'                (rule 15)
-	Expr -> Expr . Expr                                 (rule 16)
-
-	int            shift, and enter state 7
-	'+'            shift, and enter state 29
-	sum            shift, and enter state 8
-	'-'            shift, and enter state 30
-	sub            shift, and enter state 9
-	'*'            shift, and enter state 31
-	mult           shift, and enter state 10
-	'('            shift, and enter state 11
-	','            shift, and enter state 53
-	let            shift, and enter state 12
-	var            shift, and enter state 13
-	lam            shift, and enter state 14
-
-	Expr           goto state 28
-
-State 40
-
-	Expr -> '(' Expr ')' .                              (rule 7)
+	Expr -> int .                                       (rule 7)
 
 	int            reduce using rule 7
 	'+'            reduce using rule 7
-	sum            reduce using rule 7
 	'-'            reduce using rule 7
-	sub            reduce using rule 7
 	'*'            reduce using rule 7
-	mult           reduce using rule 7
 	'('            reduce using rule 7
 	')'            reduce using rule 7
 	']'            reduce using rule 7
@@ -644,415 +152,207 @@ State 40
 	lam            reduce using rule 7
 
 
-State 41
+State 7
 
-	Expr -> let var '=' . Expr in Expr                  (rule 18)
+	Expr -> '+' . '(' Expr ',' Expr ')'                 (rule 10)
 
-	int            shift, and enter state 7
-	sum            shift, and enter state 8
-	sub            shift, and enter state 9
-	mult           shift, and enter state 10
-	'('            shift, and enter state 11
-	let            shift, and enter state 12
-	var            shift, and enter state 13
-	lam            shift, and enter state 14
+	'('            shift, and enter state 25
 
-	Expr           goto state 52
 
-State 42
+State 8
 
-	Expr -> lam var '(' . Expr ')'                      (rule 17)
+	Expr -> '-' . '(' Expr ',' Expr ')'                 (rule 12)
 
-	int            shift, and enter state 7
-	sum            shift, and enter state 8
-	sub            shift, and enter state 9
-	mult           shift, and enter state 10
-	'('            shift, and enter state 11
-	let            shift, and enter state 12
-	var            shift, and enter state 13
-	lam            shift, and enter state 14
+	'('            shift, and enter state 24
 
-	Expr           goto state 51
 
-State 43
+State 9
 
-	PastExp -> '[' MappingExps . ']'                    (rule 19)
-	MappingExps -> MappingExps . ',' MappingExp         (rule 20)
+	Expr -> '*' . '(' Expr ',' Expr ')'                 (rule 14)
 
-	']'            shift, and enter state 49
-	','            shift, and enter state 50
+	'('            shift, and enter state 23
 
 
-State 44
+State 10
 
-	MappingExps -> MappingExp .                         (rule 21)
+	Expr -> '(' . Expr ')'                              (rule 6)
 
-	']'            reduce using rule 21
-	','            reduce using rule 21
+	int            shift, and enter state 6
+	'+'            shift, and enter state 7
+	'-'            shift, and enter state 8
+	'*'            shift, and enter state 9
+	'('            shift, and enter state 10
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
 
+	Expr           goto state 22
 
-State 45
+State 11
 
-	MappingExp -> '(' . '[' Exprs ']' ',' '[' Exprs ']' ')'    (rule 22)
+	Expr -> let . var '=' Expr in Expr                  (rule 17)
 
-	'['            shift, and enter state 48
+	var            shift, and enter state 21
 
 
-State 46
+State 12
 
-	Exp -> pastCount '=' int .                          (rule 6)
+	Expr -> var .                                       (rule 8)
 
-	']'            reduce using rule 6
+	int            reduce using rule 8
+	'+'            reduce using rule 8
+	'-'            reduce using rule 8
+	'*'            reduce using rule 8
+	'('            reduce using rule 8
+	')'            reduce using rule 8
+	']'            reduce using rule 8
+	','            reduce using rule 8
+	let            reduce using rule 8
+	in             reduce using rule 8
+	var            reduce using rule 8
+	lam            reduce using rule 8
 
 
-State 47
+State 13
 
-	Exp -> inStreamCount '=' int .                      (rule 5)
+	Expr -> lam . var '(' Expr ')'                      (rule 16)
 
-	']'            reduce using rule 5
+	var            shift, and enter state 20
 
 
-State 48
+State 14
 
-	MappingExp -> '(' '[' . Exprs ']' ',' '[' Exprs ']' ')'    (rule 22)
+	Meta -> past . '=' '[' MappingExps ']'              (rule 2)
 
-	int            shift, and enter state 7
-	sum            shift, and enter state 8
-	sub            shift, and enter state 9
-	mult           shift, and enter state 10
-	'('            shift, and enter state 11
-	let            shift, and enter state 12
-	var            shift, and enter state 13
-	lam            shift, and enter state 14
+	'='            shift, and enter state 19
 
-	Expr           goto state 64
-	Exprs          goto state 65
 
-State 49
+State 15
 
-	PastExp -> '[' MappingExps ']' .                    (rule 19)
+	Meta -> pastCnt . '=' int                           (rule 3)
 
-	']'            reduce using rule 19
+	'='            shift, and enter state 18
 
 
-State 50
+State 16
 
-	MappingExps -> MappingExps ',' . MappingExp         (rule 20)
+	Meta -> SCount . '=' '(' int ')'                    (rule 4)
 
-	'('            shift, and enter state 45
+	'='            shift, and enter state 17
 
-	MappingExp     goto state 63
 
-State 51
+State 17
 
-	Expr -> Expr . '+' Expr                             (rule 10)
-	Expr -> Expr . '-' Expr                             (rule 12)
-	Expr -> Expr . '*' Expr                             (rule 14)
-	Expr -> Expr . Expr                                 (rule 16)
-	Expr -> lam var '(' Expr . ')'                      (rule 17)
+	Meta -> SCount '=' . '(' int ')'                    (rule 4)
 
-	int            shift, and enter state 7
-	'+'            shift, and enter state 29
-	sum            shift, and enter state 8
-	'-'            shift, and enter state 30
-	sub            shift, and enter state 9
-	'*'            shift, and enter state 31
-	mult           shift, and enter state 10
-	'('            shift, and enter state 11
-	')'            shift, and enter state 62
-	let            shift, and enter state 12
-	var            shift, and enter state 13
-	lam            shift, and enter state 14
+	'('            shift, and enter state 46
 
-	Expr           goto state 28
-
-State 52
-
-	Expr -> Expr . '+' Expr                             (rule 10)
-	Expr -> Expr . '-' Expr                             (rule 12)
-	Expr -> Expr . '*' Expr                             (rule 14)
-	Expr -> Expr . Expr                                 (rule 16)
-	Expr -> let var '=' Expr . in Expr                  (rule 18)
 
-	int            shift, and enter state 7
-	'+'            shift, and enter state 29
-	sum            shift, and enter state 8
-	'-'            shift, and enter state 30
-	sub            shift, and enter state 9
-	'*'            shift, and enter state 31
-	mult           shift, and enter state 10
-	'('            shift, and enter state 11
-	let            shift, and enter state 12
-	in             shift, and enter state 61
-	var            shift, and enter state 13
-	lam            shift, and enter state 14
-
-	Expr           goto state 28
-
-State 53
-
-	Expr -> mult '(' Expr ',' . Expr ')'                (rule 15)
-
-	int            shift, and enter state 7
-	sum            shift, and enter state 8
-	sub            shift, and enter state 9
-	mult           shift, and enter state 10
-	'('            shift, and enter state 11
-	let            shift, and enter state 12
-	var            shift, and enter state 13
-	lam            shift, and enter state 14
-
-	Expr           goto state 60
-
-State 54
-
-	Expr -> sub '(' Expr ',' . Expr ')'                 (rule 13)
-
-	int            shift, and enter state 7
-	sum            shift, and enter state 8
-	sub            shift, and enter state 9
-	mult           shift, and enter state 10
-	'('            shift, and enter state 11
-	let            shift, and enter state 12
-	var            shift, and enter state 13
-	lam            shift, and enter state 14
-
-	Expr           goto state 59
-
-State 55
-
-	Expr -> sum '(' Expr ',' . Expr ')'                 (rule 11)
-
-	int            shift, and enter state 7
-	sum            shift, and enter state 8
-	sub            shift, and enter state 9
-	mult           shift, and enter state 10
-	'('            shift, and enter state 11
-	let            shift, and enter state 12
-	var            shift, and enter state 13
-	lam            shift, and enter state 14
-
-	Expr           goto state 58
-
-State 56
-
-	MetaData -> '[' Meta ']' '[' Meta . ']' '[' Meta ']'    (rule 1)
-
-	']'            shift, and enter state 57
-
-
-State 57
-
-	MetaData -> '[' Meta ']' '[' Meta ']' . '[' Meta ']'    (rule 1)
-
-	'['            shift, and enter state 72
-
-
-State 58
-
-	Expr -> Expr . '+' Expr                             (rule 10)
-	Expr -> sum '(' Expr ',' Expr . ')'                 (rule 11)
-	Expr -> Expr . '-' Expr                             (rule 12)
-	Expr -> Expr . '*' Expr                             (rule 14)
-	Expr -> Expr . Expr                                 (rule 16)
-
-	int            shift, and enter state 7
-	'+'            shift, and enter state 29
-	sum            shift, and enter state 8
-	'-'            shift, and enter state 30
-	sub            shift, and enter state 9
-	'*'            shift, and enter state 31
-	mult           shift, and enter state 10
-	'('            shift, and enter state 11
-	')'            shift, and enter state 71
-	let            shift, and enter state 12
-	var            shift, and enter state 13
-	lam            shift, and enter state 14
-
-	Expr           goto state 28
-
-State 59
-
-	Expr -> Expr . '+' Expr                             (rule 10)
-	Expr -> Expr . '-' Expr                             (rule 12)
-	Expr -> sub '(' Expr ',' Expr . ')'                 (rule 13)
-	Expr -> Expr . '*' Expr                             (rule 14)
-	Expr -> Expr . Expr                                 (rule 16)
-
-	int            shift, and enter state 7
-	'+'            shift, and enter state 29
-	sum            shift, and enter state 8
-	'-'            shift, and enter state 30
-	sub            shift, and enter state 9
-	'*'            shift, and enter state 31
-	mult           shift, and enter state 10
-	'('            shift, and enter state 11
-	')'            shift, and enter state 70
-	let            shift, and enter state 12
-	var            shift, and enter state 13
-	lam            shift, and enter state 14
-
-	Expr           goto state 28
-
-State 60
-
-	Expr -> Expr . '+' Expr                             (rule 10)
-	Expr -> Expr . '-' Expr                             (rule 12)
-	Expr -> Expr . '*' Expr                             (rule 14)
-	Expr -> mult '(' Expr ',' Expr . ')'                (rule 15)
-	Expr -> Expr . Expr                                 (rule 16)
-
-	int            shift, and enter state 7
-	'+'            shift, and enter state 29
-	sum            shift, and enter state 8
-	'-'            shift, and enter state 30
-	sub            shift, and enter state 9
-	'*'            shift, and enter state 31
-	mult           shift, and enter state 10
-	'('            shift, and enter state 11
-	')'            shift, and enter state 69
-	let            shift, and enter state 12
-	var            shift, and enter state 13
-	lam            shift, and enter state 14
-
-	Expr           goto state 28
+State 18
 
-State 61
+	Meta -> pastCnt '=' . int                           (rule 3)
 
-	Expr -> let var '=' Expr in . Expr                  (rule 18)
+	int            shift, and enter state 45
 
-	int            shift, and enter state 7
-	sum            shift, and enter state 8
-	sub            shift, and enter state 9
-	mult           shift, and enter state 10
-	'('            shift, and enter state 11
-	let            shift, and enter state 12
-	var            shift, and enter state 13
-	lam            shift, and enter state 14
-
-	Expr           goto state 68
-
-State 62
-
-	Expr -> lam var '(' Expr ')' .                      (rule 17)
-
-	int            reduce using rule 17
-	'+'            reduce using rule 17
-	sum            reduce using rule 17
-	'-'            reduce using rule 17
-	sub            reduce using rule 17
-	'*'            reduce using rule 17
-	mult           reduce using rule 17
-	'('            reduce using rule 17
-	')'            reduce using rule 17
-	']'            reduce using rule 17
-	','            reduce using rule 17
-	let            reduce using rule 17
-	in             reduce using rule 17
-	var            reduce using rule 17
-	lam            reduce using rule 17
-
-
-State 63
-
-	MappingExps -> MappingExps ',' MappingExp .         (rule 20)
-
-	']'            reduce using rule 20
-	','            reduce using rule 20
-
-
-State 64
-
-	Expr -> Expr . '+' Expr                             (rule 10)
-	Expr -> Expr . '-' Expr                             (rule 12)
-	Expr -> Expr . '*' Expr                             (rule 14)
-	Expr -> Expr . Expr                                 (rule 16)
-	Exprs -> Expr .                                     (rule 24)
-
-	int            shift, and enter state 7
-	'+'            shift, and enter state 29
-	sum            shift, and enter state 8
-	'-'            shift, and enter state 30
-	sub            shift, and enter state 9
-	'*'            shift, and enter state 31
-	mult           shift, and enter state 10
-	'('            shift, and enter state 11
-	']'            reduce using rule 24
-	','            reduce using rule 24
-	let            shift, and enter state 12
-	var            shift, and enter state 13
-	lam            shift, and enter state 14
-
-	Expr           goto state 28
-
-State 65
-
-	MappingExp -> '(' '[' Exprs . ']' ',' '[' Exprs ']' ')'    (rule 22)
-	Exprs -> Exprs . ',' Expr                           (rule 23)
-
-	']'            shift, and enter state 66
-	','            shift, and enter state 67
-
-
-State 66
-
-	MappingExp -> '(' '[' Exprs ']' . ',' '[' Exprs ']' ')'    (rule 22)
-
-	','            shift, and enter state 75
-
-
-State 67
-
-	Exprs -> Exprs ',' . Expr                           (rule 23)
-
-	int            shift, and enter state 7
-	sum            shift, and enter state 8
-	sub            shift, and enter state 9
-	mult           shift, and enter state 10
-	'('            shift, and enter state 11
-	let            shift, and enter state 12
-	var            shift, and enter state 13
-	lam            shift, and enter state 14
-
-	Expr           goto state 74
-
-State 68
-
-	Expr -> Expr . '+' Expr                             (rule 10)
-	Expr -> Expr . '-' Expr                             (rule 12)
-	Expr -> Expr . '*' Expr                             (rule 14)
-	Expr -> Expr . Expr                                 (rule 16)
-	Expr -> let var '=' Expr in Expr .                  (rule 18)
-
-	int            fail
-	'+'            shift, and enter state 29
-	sum            shift, and enter state 8
-	'-'            shift, and enter state 30
-	sub            shift, and enter state 9
-	'*'            shift, and enter state 31
-	mult           shift, and enter state 10
-	'('            fail
-	')'            reduce using rule 18
-	']'            reduce using rule 18
-	','            reduce using rule 18
-	let            shift, and enter state 12
-	in             reduce using rule 18
-	var            fail
-	lam            shift, and enter state 14
-
-	Expr           goto state 28
-
-State 69
-
-	Expr -> mult '(' Expr ',' Expr ')' .                (rule 15)
+
+State 19
+
+	Meta -> past '=' . '[' MappingExps ']'              (rule 2)
+
+	'['            shift, and enter state 44
+
+
+State 20
+
+	Expr -> lam var . '(' Expr ')'                      (rule 16)
+
+	'('            shift, and enter state 43
+
+
+State 21
+
+	Expr -> let var . '=' Expr in Expr                  (rule 17)
+
+	'='            shift, and enter state 42
+
+
+State 22
+
+	Expr -> '(' Expr . ')'                              (rule 6)
+	Expr -> Expr . '+' Expr                             (rule 9)
+	Expr -> Expr . '-' Expr                             (rule 11)
+	Expr -> Expr . '*' Expr                             (rule 13)
+	Expr -> Expr . Expr                                 (rule 15)
+
+	int            shift, and enter state 6
+	'+'            shift, and enter state 27
+	'-'            shift, and enter state 28
+	'*'            shift, and enter state 29
+	'('            shift, and enter state 10
+	')'            shift, and enter state 41
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+
+	Expr           goto state 26
+
+State 23
+
+	Expr -> '*' '(' . Expr ',' Expr ')'                 (rule 14)
+
+	int            shift, and enter state 6
+	'+'            shift, and enter state 7
+	'-'            shift, and enter state 8
+	'*'            shift, and enter state 9
+	'('            shift, and enter state 10
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+
+	Expr           goto state 40
+
+State 24
+
+	Expr -> '-' '(' . Expr ',' Expr ')'                 (rule 12)
+
+	int            shift, and enter state 6
+	'+'            shift, and enter state 7
+	'-'            shift, and enter state 8
+	'*'            shift, and enter state 9
+	'('            shift, and enter state 10
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+
+	Expr           goto state 39
+
+State 25
+
+	Expr -> '+' '(' . Expr ',' Expr ')'                 (rule 10)
+
+	int            shift, and enter state 6
+	'+'            shift, and enter state 7
+	'-'            shift, and enter state 8
+	'*'            shift, and enter state 9
+	'('            shift, and enter state 10
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+
+	Expr           goto state 38
+
+State 26
+
+	Expr -> Expr . '+' Expr                             (rule 9)
+	Expr -> Expr . '-' Expr                             (rule 11)
+	Expr -> Expr . '*' Expr                             (rule 13)
+	Expr -> Expr . Expr                                 (rule 15)
+	Expr -> Expr Expr .                                 (rule 15)
 
 	int            reduce using rule 15
 	'+'            reduce using rule 15
-	sum            reduce using rule 15
 	'-'            reduce using rule 15
-	sub            reduce using rule 15
 	'*'            reduce using rule 15
-	mult           reduce using rule 15
 	'('            reduce using rule 15
 	')'            reduce using rule 15
 	']'            reduce using rule 15
@@ -1062,158 +362,899 @@ State 69
 	var            reduce using rule 15
 	lam            reduce using rule 15
 
+	Expr           goto state 26
 
-State 70
+State 27
 
-	Expr -> sub '(' Expr ',' Expr ')' .                 (rule 13)
+	Expr -> Expr '+' . Expr                             (rule 9)
+	Expr -> '+' . '(' Expr ',' Expr ')'                 (rule 10)
+
+	int            shift, and enter state 6
+	'+'            shift, and enter state 7
+	'-'            shift, and enter state 8
+	'*'            shift, and enter state 9
+	'('            shift, and enter state 37
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+
+	Expr           goto state 36
+
+State 28
+
+	Expr -> Expr '-' . Expr                             (rule 11)
+	Expr -> '-' . '(' Expr ',' Expr ')'                 (rule 12)
+
+	int            shift, and enter state 6
+	'+'            shift, and enter state 7
+	'-'            shift, and enter state 8
+	'*'            shift, and enter state 9
+	'('            shift, and enter state 35
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+
+	Expr           goto state 34
+
+State 29
+
+	Expr -> Expr '*' . Expr                             (rule 13)
+	Expr -> '*' . '(' Expr ',' Expr ')'                 (rule 14)
+
+	int            shift, and enter state 6
+	'+'            shift, and enter state 7
+	'-'            shift, and enter state 8
+	'*'            shift, and enter state 9
+	'('            shift, and enter state 33
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+
+	Expr           goto state 32
+
+State 30
+
+	MetaData -> '[' Meta ']' . '[' Meta ']' '[' Meta ']'    (rule 1)
+
+	'['            shift, and enter state 31
+
+
+State 31
+
+	MetaData -> '[' Meta ']' '[' . Meta ']' '[' Meta ']'    (rule 1)
+
+	int            shift, and enter state 6
+	'+'            shift, and enter state 7
+	'-'            shift, and enter state 8
+	'*'            shift, and enter state 9
+	'('            shift, and enter state 10
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+	past           shift, and enter state 14
+	pastCnt        shift, and enter state 15
+	SCount         shift, and enter state 16
+
+	Meta           goto state 59
+	Expr           goto state 5
+
+State 32
+
+	Expr -> Expr . '+' Expr                             (rule 9)
+	Expr -> Expr . '-' Expr                             (rule 11)
+	Expr -> Expr . '*' Expr                             (rule 13)
+	Expr -> Expr '*' Expr .                             (rule 13)
+	Expr -> Expr . Expr                                 (rule 15)
 
 	int            reduce using rule 13
 	'+'            reduce using rule 13
-	sum            reduce using rule 13
 	'-'            reduce using rule 13
-	sub            reduce using rule 13
 	'*'            reduce using rule 13
-	mult           reduce using rule 13
 	'('            reduce using rule 13
 	')'            reduce using rule 13
 	']'            reduce using rule 13
 	','            reduce using rule 13
-	let            reduce using rule 13
+	let            shift, and enter state 11
 	in             reduce using rule 13
 	var            reduce using rule 13
-	lam            reduce using rule 13
+	lam            shift, and enter state 13
 
+	Expr           goto state 26
 
-State 71
+State 33
 
-	Expr -> sum '(' Expr ',' Expr ')' .                 (rule 11)
+	Expr -> '(' . Expr ')'                              (rule 6)
+	Expr -> '*' '(' . Expr ',' Expr ')'                 (rule 14)
+
+	int            shift, and enter state 6
+	'+'            shift, and enter state 7
+	'-'            shift, and enter state 8
+	'*'            shift, and enter state 9
+	'('            shift, and enter state 10
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+
+	Expr           goto state 58
+
+State 34
+
+	Expr -> Expr . '+' Expr                             (rule 9)
+	Expr -> Expr . '-' Expr                             (rule 11)
+	Expr -> Expr '-' Expr .                             (rule 11)
+	Expr -> Expr . '*' Expr                             (rule 13)
+	Expr -> Expr . Expr                                 (rule 15)
 
 	int            reduce using rule 11
 	'+'            reduce using rule 11
-	sum            reduce using rule 11
 	'-'            reduce using rule 11
-	sub            reduce using rule 11
-	'*'            reduce using rule 11
-	mult           reduce using rule 11
+	'*'            shift, and enter state 29
 	'('            reduce using rule 11
 	')'            reduce using rule 11
 	']'            reduce using rule 11
 	','            reduce using rule 11
-	let            reduce using rule 11
+	let            shift, and enter state 11
 	in             reduce using rule 11
 	var            reduce using rule 11
-	lam            reduce using rule 11
+	lam            shift, and enter state 13
 
+	Expr           goto state 26
+
+State 35
+
+	Expr -> '(' . Expr ')'                              (rule 6)
+	Expr -> '-' '(' . Expr ',' Expr ')'                 (rule 12)
+
+	int            shift, and enter state 6
+	'+'            shift, and enter state 7
+	'-'            shift, and enter state 8
+	'*'            shift, and enter state 9
+	'('            shift, and enter state 10
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+
+	Expr           goto state 57
+
+State 36
+
+	Expr -> Expr . '+' Expr                             (rule 9)
+	Expr -> Expr '+' Expr .                             (rule 9)
+	Expr -> Expr . '-' Expr                             (rule 11)
+	Expr -> Expr . '*' Expr                             (rule 13)
+	Expr -> Expr . Expr                                 (rule 15)
+
+	int            reduce using rule 9
+	'+'            reduce using rule 9
+	'-'            reduce using rule 9
+	'*'            shift, and enter state 29
+	'('            reduce using rule 9
+	')'            reduce using rule 9
+	']'            reduce using rule 9
+	','            reduce using rule 9
+	let            shift, and enter state 11
+	in             reduce using rule 9
+	var            reduce using rule 9
+	lam            shift, and enter state 13
+
+	Expr           goto state 26
+
+State 37
+
+	Expr -> '(' . Expr ')'                              (rule 6)
+	Expr -> '+' '(' . Expr ',' Expr ')'                 (rule 10)
+
+	int            shift, and enter state 6
+	'+'            shift, and enter state 7
+	'-'            shift, and enter state 8
+	'*'            shift, and enter state 9
+	'('            shift, and enter state 10
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+
+	Expr           goto state 56
+
+State 38
+
+	Expr -> Expr . '+' Expr                             (rule 9)
+	Expr -> '+' '(' Expr . ',' Expr ')'                 (rule 10)
+	Expr -> Expr . '-' Expr                             (rule 11)
+	Expr -> Expr . '*' Expr                             (rule 13)
+	Expr -> Expr . Expr                                 (rule 15)
+
+	int            shift, and enter state 6
+	'+'            shift, and enter state 27
+	'-'            shift, and enter state 28
+	'*'            shift, and enter state 29
+	'('            shift, and enter state 10
+	','            shift, and enter state 55
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+
+	Expr           goto state 26
+
+State 39
+
+	Expr -> Expr . '+' Expr                             (rule 9)
+	Expr -> Expr . '-' Expr                             (rule 11)
+	Expr -> '-' '(' Expr . ',' Expr ')'                 (rule 12)
+	Expr -> Expr . '*' Expr                             (rule 13)
+	Expr -> Expr . Expr                                 (rule 15)
+
+	int            shift, and enter state 6
+	'+'            shift, and enter state 27
+	'-'            shift, and enter state 28
+	'*'            shift, and enter state 29
+	'('            shift, and enter state 10
+	','            shift, and enter state 54
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+
+	Expr           goto state 26
+
+State 40
+
+	Expr -> Expr . '+' Expr                             (rule 9)
+	Expr -> Expr . '-' Expr                             (rule 11)
+	Expr -> Expr . '*' Expr                             (rule 13)
+	Expr -> '*' '(' Expr . ',' Expr ')'                 (rule 14)
+	Expr -> Expr . Expr                                 (rule 15)
+
+	int            shift, and enter state 6
+	'+'            shift, and enter state 27
+	'-'            shift, and enter state 28
+	'*'            shift, and enter state 29
+	'('            shift, and enter state 10
+	','            shift, and enter state 53
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+
+	Expr           goto state 26
+
+State 41
+
+	Expr -> '(' Expr ')' .                              (rule 6)
+
+	int            reduce using rule 6
+	'+'            reduce using rule 6
+	'-'            reduce using rule 6
+	'*'            reduce using rule 6
+	'('            reduce using rule 6
+	')'            reduce using rule 6
+	']'            reduce using rule 6
+	','            reduce using rule 6
+	let            reduce using rule 6
+	in             reduce using rule 6
+	var            reduce using rule 6
+	lam            reduce using rule 6
+
+
+State 42
+
+	Expr -> let var '=' . Expr in Expr                  (rule 17)
+
+	int            shift, and enter state 6
+	'+'            shift, and enter state 7
+	'-'            shift, and enter state 8
+	'*'            shift, and enter state 9
+	'('            shift, and enter state 10
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+
+	Expr           goto state 52
+
+State 43
+
+	Expr -> lam var '(' . Expr ')'                      (rule 16)
+
+	int            shift, and enter state 6
+	'+'            shift, and enter state 7
+	'-'            shift, and enter state 8
+	'*'            shift, and enter state 9
+	'('            shift, and enter state 10
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+
+	Expr           goto state 51
+
+State 44
+
+	Meta -> past '=' '[' . MappingExps ']'              (rule 2)
+
+	'('            shift, and enter state 50
+
+	MappingExps    goto state 48
+	MappingExp     goto state 49
+
+State 45
+
+	Meta -> pastCnt '=' int .                           (rule 3)
+
+	']'            reduce using rule 3
+
+
+State 46
+
+	Meta -> SCount '=' '(' . int ')'                    (rule 4)
+
+	int            shift, and enter state 47
+
+
+State 47
+
+	Meta -> SCount '=' '(' int . ')'                    (rule 4)
+
+	')'            shift, and enter state 69
+
+
+State 48
+
+	Meta -> past '=' '[' MappingExps . ']'              (rule 2)
+	MappingExps -> MappingExps . ',' MappingExp         (rule 18)
+
+	']'            shift, and enter state 67
+	','            shift, and enter state 68
+
+
+State 49
+
+	MappingExps -> MappingExp .                         (rule 19)
+
+	']'            reduce using rule 19
+	','            reduce using rule 19
+
+
+State 50
+
+	MappingExp -> '(' . '[' Exprs ']' ',' '[' Exprs ']' ')'    (rule 20)
+
+	'['            shift, and enter state 66
+
+
+State 51
+
+	Expr -> Expr . '+' Expr                             (rule 9)
+	Expr -> Expr . '-' Expr                             (rule 11)
+	Expr -> Expr . '*' Expr                             (rule 13)
+	Expr -> Expr . Expr                                 (rule 15)
+	Expr -> lam var '(' Expr . ')'                      (rule 16)
+
+	int            shift, and enter state 6
+	'+'            shift, and enter state 27
+	'-'            shift, and enter state 28
+	'*'            shift, and enter state 29
+	'('            shift, and enter state 10
+	')'            shift, and enter state 65
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+
+	Expr           goto state 26
+
+State 52
+
+	Expr -> Expr . '+' Expr                             (rule 9)
+	Expr -> Expr . '-' Expr                             (rule 11)
+	Expr -> Expr . '*' Expr                             (rule 13)
+	Expr -> Expr . Expr                                 (rule 15)
+	Expr -> let var '=' Expr . in Expr                  (rule 17)
+
+	int            shift, and enter state 6
+	'+'            shift, and enter state 27
+	'-'            shift, and enter state 28
+	'*'            shift, and enter state 29
+	'('            shift, and enter state 10
+	let            shift, and enter state 11
+	in             shift, and enter state 64
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+
+	Expr           goto state 26
+
+State 53
+
+	Expr -> '*' '(' Expr ',' . Expr ')'                 (rule 14)
+
+	int            shift, and enter state 6
+	'+'            shift, and enter state 7
+	'-'            shift, and enter state 8
+	'*'            shift, and enter state 9
+	'('            shift, and enter state 10
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+
+	Expr           goto state 63
+
+State 54
+
+	Expr -> '-' '(' Expr ',' . Expr ')'                 (rule 12)
+
+	int            shift, and enter state 6
+	'+'            shift, and enter state 7
+	'-'            shift, and enter state 8
+	'*'            shift, and enter state 9
+	'('            shift, and enter state 10
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+
+	Expr           goto state 62
+
+State 55
+
+	Expr -> '+' '(' Expr ',' . Expr ')'                 (rule 10)
+
+	int            shift, and enter state 6
+	'+'            shift, and enter state 7
+	'-'            shift, and enter state 8
+	'*'            shift, and enter state 9
+	'('            shift, and enter state 10
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+
+	Expr           goto state 61
+
+State 56
+
+	Expr -> '(' Expr . ')'                              (rule 6)
+	Expr -> Expr . '+' Expr                             (rule 9)
+	Expr -> '+' '(' Expr . ',' Expr ')'                 (rule 10)
+	Expr -> Expr . '-' Expr                             (rule 11)
+	Expr -> Expr . '*' Expr                             (rule 13)
+	Expr -> Expr . Expr                                 (rule 15)
+
+	int            shift, and enter state 6
+	'+'            shift, and enter state 27
+	'-'            shift, and enter state 28
+	'*'            shift, and enter state 29
+	'('            shift, and enter state 10
+	')'            shift, and enter state 41
+	','            shift, and enter state 55
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+
+	Expr           goto state 26
+
+State 57
+
+	Expr -> '(' Expr . ')'                              (rule 6)
+	Expr -> Expr . '+' Expr                             (rule 9)
+	Expr -> Expr . '-' Expr                             (rule 11)
+	Expr -> '-' '(' Expr . ',' Expr ')'                 (rule 12)
+	Expr -> Expr . '*' Expr                             (rule 13)
+	Expr -> Expr . Expr                                 (rule 15)
+
+	int            shift, and enter state 6
+	'+'            shift, and enter state 27
+	'-'            shift, and enter state 28
+	'*'            shift, and enter state 29
+	'('            shift, and enter state 10
+	')'            shift, and enter state 41
+	','            shift, and enter state 54
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+
+	Expr           goto state 26
+
+State 58
+
+	Expr -> '(' Expr . ')'                              (rule 6)
+	Expr -> Expr . '+' Expr                             (rule 9)
+	Expr -> Expr . '-' Expr                             (rule 11)
+	Expr -> Expr . '*' Expr                             (rule 13)
+	Expr -> '*' '(' Expr . ',' Expr ')'                 (rule 14)
+	Expr -> Expr . Expr                                 (rule 15)
+
+	int            shift, and enter state 6
+	'+'            shift, and enter state 27
+	'-'            shift, and enter state 28
+	'*'            shift, and enter state 29
+	'('            shift, and enter state 10
+	')'            shift, and enter state 41
+	','            shift, and enter state 53
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+
+	Expr           goto state 26
+
+State 59
+
+	MetaData -> '[' Meta ']' '[' Meta . ']' '[' Meta ']'    (rule 1)
+
+	']'            shift, and enter state 60
+
+
+State 60
+
+	MetaData -> '[' Meta ']' '[' Meta ']' . '[' Meta ']'    (rule 1)
+
+	'['            shift, and enter state 77
+
+
+State 61
+
+	Expr -> Expr . '+' Expr                             (rule 9)
+	Expr -> '+' '(' Expr ',' Expr . ')'                 (rule 10)
+	Expr -> Expr . '-' Expr                             (rule 11)
+	Expr -> Expr . '*' Expr                             (rule 13)
+	Expr -> Expr . Expr                                 (rule 15)
+
+	int            shift, and enter state 6
+	'+'            shift, and enter state 27
+	'-'            shift, and enter state 28
+	'*'            shift, and enter state 29
+	'('            shift, and enter state 10
+	')'            shift, and enter state 76
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+
+	Expr           goto state 26
+
+State 62
+
+	Expr -> Expr . '+' Expr                             (rule 9)
+	Expr -> Expr . '-' Expr                             (rule 11)
+	Expr -> '-' '(' Expr ',' Expr . ')'                 (rule 12)
+	Expr -> Expr . '*' Expr                             (rule 13)
+	Expr -> Expr . Expr                                 (rule 15)
+
+	int            shift, and enter state 6
+	'+'            shift, and enter state 27
+	'-'            shift, and enter state 28
+	'*'            shift, and enter state 29
+	'('            shift, and enter state 10
+	')'            shift, and enter state 75
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+
+	Expr           goto state 26
+
+State 63
+
+	Expr -> Expr . '+' Expr                             (rule 9)
+	Expr -> Expr . '-' Expr                             (rule 11)
+	Expr -> Expr . '*' Expr                             (rule 13)
+	Expr -> '*' '(' Expr ',' Expr . ')'                 (rule 14)
+	Expr -> Expr . Expr                                 (rule 15)
+
+	int            shift, and enter state 6
+	'+'            shift, and enter state 27
+	'-'            shift, and enter state 28
+	'*'            shift, and enter state 29
+	'('            shift, and enter state 10
+	')'            shift, and enter state 74
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+
+	Expr           goto state 26
+
+State 64
+
+	Expr -> let var '=' Expr in . Expr                  (rule 17)
+
+	int            shift, and enter state 6
+	'+'            shift, and enter state 7
+	'-'            shift, and enter state 8
+	'*'            shift, and enter state 9
+	'('            shift, and enter state 10
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+
+	Expr           goto state 73
+
+State 65
+
+	Expr -> lam var '(' Expr ')' .                      (rule 16)
+
+	int            reduce using rule 16
+	'+'            reduce using rule 16
+	'-'            reduce using rule 16
+	'*'            reduce using rule 16
+	'('            reduce using rule 16
+	')'            reduce using rule 16
+	']'            reduce using rule 16
+	','            reduce using rule 16
+	let            reduce using rule 16
+	in             reduce using rule 16
+	var            reduce using rule 16
+	lam            reduce using rule 16
+
+
+State 66
+
+	MappingExp -> '(' '[' . Exprs ']' ',' '[' Exprs ']' ')'    (rule 20)
+
+	int            shift, and enter state 6
+	'+'            shift, and enter state 7
+	'-'            shift, and enter state 8
+	'*'            shift, and enter state 9
+	'('            shift, and enter state 10
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+
+	Expr           goto state 71
+	Exprs          goto state 72
+
+State 67
+
+	Meta -> past '=' '[' MappingExps ']' .              (rule 2)
+
+	']'            reduce using rule 2
+
+
+State 68
+
+	MappingExps -> MappingExps ',' . MappingExp         (rule 18)
+
+	'('            shift, and enter state 50
+
+	MappingExp     goto state 70
+
+State 69
+
+	Meta -> SCount '=' '(' int ')' .                    (rule 4)
+
+	']'            reduce using rule 4
+
+
+State 70
+
+	MappingExps -> MappingExps ',' MappingExp .         (rule 18)
+
+	']'            reduce using rule 18
+	','            reduce using rule 18
+
+
+State 71
+
+	Expr -> Expr . '+' Expr                             (rule 9)
+	Expr -> Expr . '-' Expr                             (rule 11)
+	Expr -> Expr . '*' Expr                             (rule 13)
+	Expr -> Expr . Expr                                 (rule 15)
+	Exprs -> Expr .                                     (rule 22)
+
+	int            shift, and enter state 6
+	'+'            shift, and enter state 27
+	'-'            shift, and enter state 28
+	'*'            shift, and enter state 29
+	'('            shift, and enter state 10
+	']'            reduce using rule 22
+	','            reduce using rule 22
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+
+	Expr           goto state 26
 
 State 72
 
-	MetaData -> '[' Meta ']' '[' Meta ']' '[' . Meta ']'    (rule 1)
+	MappingExp -> '(' '[' Exprs . ']' ',' '[' Exprs ']' ')'    (rule 20)
+	Exprs -> Exprs . ',' Expr                           (rule 21)
 
-	int            shift, and enter state 7
-	sum            shift, and enter state 8
-	sub            shift, and enter state 9
-	mult           shift, and enter state 10
-	'('            shift, and enter state 11
-	let            shift, and enter state 12
-	var            shift, and enter state 13
-	lam            shift, and enter state 14
-	past           shift, and enter state 15
-	pastCount      shift, and enter state 16
-	inStreamCount  shift, and enter state 17
+	']'            shift, and enter state 79
+	','            shift, and enter state 80
 
-	Meta           goto state 73
-	Exp            goto state 5
-	Expr           goto state 6
 
 State 73
 
-	MetaData -> '[' Meta ']' '[' Meta ']' '[' Meta . ']'    (rule 1)
+	Expr -> Expr . '+' Expr                             (rule 9)
+	Expr -> Expr . '-' Expr                             (rule 11)
+	Expr -> Expr . '*' Expr                             (rule 13)
+	Expr -> Expr . Expr                                 (rule 15)
+	Expr -> let var '=' Expr in Expr .                  (rule 17)
 
-	']'            shift, and enter state 77
+	int            fail
+	'+'            shift, and enter state 27
+	'-'            shift, and enter state 28
+	'*'            shift, and enter state 29
+	'('            fail
+	')'            reduce using rule 17
+	']'            reduce using rule 17
+	','            reduce using rule 17
+	let            shift, and enter state 11
+	in             reduce using rule 17
+	var            fail
+	lam            shift, and enter state 13
 
+	Expr           goto state 26
 
 State 74
 
-	Expr -> Expr . '+' Expr                             (rule 10)
-	Expr -> Expr . '-' Expr                             (rule 12)
-	Expr -> Expr . '*' Expr                             (rule 14)
-	Expr -> Expr . Expr                                 (rule 16)
-	Exprs -> Exprs ',' Expr .                           (rule 23)
+	Expr -> '*' '(' Expr ',' Expr ')' .                 (rule 14)
 
-	int            shift, and enter state 7
-	'+'            shift, and enter state 29
-	sum            shift, and enter state 8
-	'-'            shift, and enter state 30
-	sub            shift, and enter state 9
-	'*'            shift, and enter state 31
-	mult           shift, and enter state 10
-	'('            shift, and enter state 11
-	']'            reduce using rule 23
-	','            reduce using rule 23
-	let            shift, and enter state 12
-	var            shift, and enter state 13
-	lam            shift, and enter state 14
+	int            reduce using rule 14
+	'+'            reduce using rule 14
+	'-'            reduce using rule 14
+	'*'            reduce using rule 14
+	'('            reduce using rule 14
+	')'            reduce using rule 14
+	']'            reduce using rule 14
+	','            reduce using rule 14
+	let            reduce using rule 14
+	in             reduce using rule 14
+	var            reduce using rule 14
+	lam            reduce using rule 14
 
-	Expr           goto state 28
 
 State 75
 
-	MappingExp -> '(' '[' Exprs ']' ',' . '[' Exprs ']' ')'    (rule 22)
+	Expr -> '-' '(' Expr ',' Expr ')' .                 (rule 12)
 
-	'['            shift, and enter state 76
+	int            reduce using rule 12
+	'+'            reduce using rule 12
+	'-'            reduce using rule 12
+	'*'            reduce using rule 12
+	'('            reduce using rule 12
+	')'            reduce using rule 12
+	']'            reduce using rule 12
+	','            reduce using rule 12
+	let            reduce using rule 12
+	in             reduce using rule 12
+	var            reduce using rule 12
+	lam            reduce using rule 12
 
 
 State 76
 
-	MappingExp -> '(' '[' Exprs ']' ',' '[' . Exprs ']' ')'    (rule 22)
+	Expr -> '+' '(' Expr ',' Expr ')' .                 (rule 10)
 
-	int            shift, and enter state 7
-	sum            shift, and enter state 8
-	sub            shift, and enter state 9
-	mult           shift, and enter state 10
-	'('            shift, and enter state 11
-	let            shift, and enter state 12
-	var            shift, and enter state 13
-	lam            shift, and enter state 14
+	int            reduce using rule 10
+	'+'            reduce using rule 10
+	'-'            reduce using rule 10
+	'*'            reduce using rule 10
+	'('            reduce using rule 10
+	')'            reduce using rule 10
+	']'            reduce using rule 10
+	','            reduce using rule 10
+	let            reduce using rule 10
+	in             reduce using rule 10
+	var            reduce using rule 10
+	lam            reduce using rule 10
 
-	Expr           goto state 64
-	Exprs          goto state 78
 
 State 77
+
+	MetaData -> '[' Meta ']' '[' Meta ']' '[' . Meta ']'    (rule 1)
+
+	int            shift, and enter state 6
+	'+'            shift, and enter state 7
+	'-'            shift, and enter state 8
+	'*'            shift, and enter state 9
+	'('            shift, and enter state 10
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+	past           shift, and enter state 14
+	pastCnt        shift, and enter state 15
+	SCount         shift, and enter state 16
+
+	Meta           goto state 78
+	Expr           goto state 5
+
+State 78
+
+	MetaData -> '[' Meta ']' '[' Meta ']' '[' Meta . ']'    (rule 1)
+
+	']'            shift, and enter state 83
+
+
+State 79
+
+	MappingExp -> '(' '[' Exprs ']' . ',' '[' Exprs ']' ')'    (rule 20)
+
+	','            shift, and enter state 82
+
+
+State 80
+
+	Exprs -> Exprs ',' . Expr                           (rule 21)
+
+	int            shift, and enter state 6
+	'+'            shift, and enter state 7
+	'-'            shift, and enter state 8
+	'*'            shift, and enter state 9
+	'('            shift, and enter state 10
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+
+	Expr           goto state 81
+
+State 81
+
+	Expr -> Expr . '+' Expr                             (rule 9)
+	Expr -> Expr . '-' Expr                             (rule 11)
+	Expr -> Expr . '*' Expr                             (rule 13)
+	Expr -> Expr . Expr                                 (rule 15)
+	Exprs -> Exprs ',' Expr .                           (rule 21)
+
+	int            shift, and enter state 6
+	'+'            shift, and enter state 27
+	'-'            shift, and enter state 28
+	'*'            shift, and enter state 29
+	'('            shift, and enter state 10
+	']'            reduce using rule 21
+	','            reduce using rule 21
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+
+	Expr           goto state 26
+
+State 82
+
+	MappingExp -> '(' '[' Exprs ']' ',' . '[' Exprs ']' ')'    (rule 20)
+
+	'['            shift, and enter state 84
+
+
+State 83
 
 	MetaData -> '[' Meta ']' '[' Meta ']' '[' Meta ']' .    (rule 1)
 
 	%eof           reduce using rule 1
 
 
-State 78
+State 84
 
-	MappingExp -> '(' '[' Exprs ']' ',' '[' Exprs . ']' ')'    (rule 22)
-	Exprs -> Exprs . ',' Expr                           (rule 23)
+	MappingExp -> '(' '[' Exprs ']' ',' '[' . Exprs ']' ')'    (rule 20)
 
-	']'            shift, and enter state 79
-	','            shift, and enter state 67
+	int            shift, and enter state 6
+	'+'            shift, and enter state 7
+	'-'            shift, and enter state 8
+	'*'            shift, and enter state 9
+	'('            shift, and enter state 10
+	let            shift, and enter state 11
+	var            shift, and enter state 12
+	lam            shift, and enter state 13
+
+	Expr           goto state 71
+	Exprs          goto state 85
+
+State 85
+
+	MappingExp -> '(' '[' Exprs ']' ',' '[' Exprs . ']' ')'    (rule 20)
+	Exprs -> Exprs . ',' Expr                           (rule 21)
+
+	']'            shift, and enter state 86
+	','            shift, and enter state 80
 
 
-State 79
+State 86
 
-	MappingExp -> '(' '[' Exprs ']' ',' '[' Exprs ']' . ')'    (rule 22)
+	MappingExp -> '(' '[' Exprs ']' ',' '[' Exprs ']' . ')'    (rule 20)
 
-	')'            shift, and enter state 80
+	')'            shift, and enter state 87
 
 
-State 80
+State 87
 
-	MappingExp -> '(' '[' Exprs ']' ',' '[' Exprs ']' ')' .    (rule 22)
+	MappingExp -> '(' '[' Exprs ']' ',' '[' Exprs ']' ')' .    (rule 20)
 
-	']'            reduce using rule 22
-	','            reduce using rule 22
+	']'            reduce using rule 20
+	','            reduce using rule 20
 
 
 -----------------------------------------------------------------------------
 Grammar Totals
 -----------------------------------------------------------------------------
-Number of rules: 25
-Number of terminals: 21
-Number of non-terminals: 9
-Number of states: 81
+Number of rules: 23
+Number of terminals: 18
+Number of non-terminals: 7
+Number of states: 88
