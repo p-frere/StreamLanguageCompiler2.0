@@ -1,0 +1,6 @@
+
+*.hi
+*.o
+interpreter/Test
+interpreter/Tokens.hs
+interpreter/Grammar.hs
