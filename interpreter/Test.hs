@@ -19,8 +19,9 @@ main' = do (fileName : _ ) <- getArgs
            forever $ do  
             l <- getLine
             let parsedL = parseInput (alexScanTokens l)
-            let past = evalIn funcs parsedL past
-            print (prettyPrint (snd (head past)))
+            --let past = evalIn funcs parsedL past
+            --print (prettyPrint (snd (head past)))
+            putStrLn ("Parsed as " ++ (show parsedL))
 
 
 getFuncs :: (Meta,Meta,Meta)  -> [Expr]

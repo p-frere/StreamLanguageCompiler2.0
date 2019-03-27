@@ -69,8 +69,8 @@ MappingExp : '(''[' Exprs ']' ',' '[' Exprs ']'')'  { ($3 , $7) }
 Exprs : Exprs ',' Expr                              { $3 : $1 }
       | Expr                                        { [$1] }
 
-IntExprs : Expr           { [$1] }
-         | IntExprs Expr  { $2 : $1 }
+IntExprs : int           { [ExInt $1] }
+         | int IntExprs  { ExInt $1 : $2 }
 
 
 { 
