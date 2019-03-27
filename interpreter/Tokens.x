@@ -69,22 +69,23 @@ data Token =
 
 
 tokenPosn :: Token -> String
-tokenPosn (TokenInt (AlexPn a l c) _) = show(l) ++ ":" ++ show(c)
-tokenPosn (TokenEq  (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
-tokenPosn (TokenPlus (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
-tokenPosn (TokenMinus (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
-tokenPosn (TokenTimes (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
-tokenPosn (TokenLParen (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
-tokenPosn (TokenRParen (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
-tokenPosn (TokenLParenSq (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
-tokenPosn (TokenRParenSq (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
-tokenPosn (TokenSeq (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
-tokenPosn (TokenLet (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
-tokenPosn (TokenIn (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
-tokenPosn (TokenLam (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
-tokenPosn (TokenVar (AlexPn a l c) _) = show(l) ++ ":" ++ show(c)
-tokenPosn (TokenPast (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
-tokenPosn (TokenPastCount (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
-tokenPosn (TokenInStreamCount (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
-tokenPosn (TokenEndLine (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
+tokenPosn (TokenInt (AlexPn a l c) s) = "Line:" ++ show(l) ++ " Col:" ++ show(c) ++ " ERROR: Integer:" ++ show(s) 
+tokenPosn (TokenEq  (AlexPn a l c)) = "Line:" ++ show(l) ++ " Col:" ++ show(c) ++ " ERROR: '='"
+tokenPosn (TokenPlus (AlexPn a l c)) = "Line:" ++ show(l) ++ " Col:" ++ show(c) ++ " ERROR: Sum / +"
+tokenPosn (TokenMinus (AlexPn a l c)) = "Line:" ++ show(l) ++ " Col:" ++ show(c) ++ " ERROR: Sub / -"
+tokenPosn (TokenTimes (AlexPn a l c)) = "Line:" ++ show(l) ++ " Col:" ++ show(c) ++ " ERROR: Mult / *"
+tokenPosn (TokenLParen (AlexPn a l c)) = "Line:" ++ show(l) ++ " Col:" ++ show(c) ++ " ERROR: '('"
+tokenPosn (TokenRParen (AlexPn a l c)) = "Line:" ++ show(l) ++ " Col:" ++ show(c) ++ " ERROR: ')'"
+tokenPosn (TokenLParenSq (AlexPn a l c)) = "Line:" ++ show(l) ++ " Col:" ++ show(c) ++ " ERROR: '['"
+tokenPosn (TokenRParenSq (AlexPn a l c)) = "Line:" ++ show(l) ++ " Col:" ++ show(c) ++ " ERROR: ']'"
+tokenPosn (TokenSeq (AlexPn a l c)) = "Line:" ++ show(l) ++ " Col:" ++ show(c) ++ " ERROR: Comma (Sequence)"
+tokenPosn (TokenLet (AlexPn a l c)) = "Line:" ++ show(l) ++ " Col:" ++ show(c) ++ " ERROR: Let Expression"
+tokenPosn (TokenIn (AlexPn a l c)) = "Line:" ++ show(l) ++ " Col:" ++ show(c) ++ " ERROR: in"
+tokenPosn (TokenLam (AlexPn a l c)) = "Line:" ++ show(l) ++ " Col:" ++ show(c) ++ " ERROR: Lambda Expression" 
+tokenPosn (TokenVar (AlexPn a l c) s) = "Line:" ++ show(l) ++ " Col:" ++ show(c) ++ " ERROR: Variable:" ++ show(s) 
+tokenPosn (TokenPast (AlexPn a l c)) = "Line:" ++ show(l) ++ " Col:" ++ show(c) ++ " ERROR: past"
+tokenPosn (TokenPastCount (AlexPn a l c)) = "Line:" ++ show(l) ++ " Col:" ++ show(c) ++ " ERROR: pastCount"
+tokenPosn (TokenInStreamCount (AlexPn a l c)) = "Line:" ++ show(l) ++ " Col:" ++ show(c) ++ " ERROR: inStreamCount"
+tokenPosn (TokenEndLine (AlexPn a l c)) = "Line:" ++ show(l) ++ " Col:" ++ show(c) ++ " ERROR: EOL (End of Line Character)"
+tokenPosn (TokenSet (AlexPn a l c)) = "Line:" ++ show(l) ++ " Col:" ++ show(c) ++ " ERROR: set"
 }

@@ -76,7 +76,7 @@ IntExprs : int           { [ExInt $1] }
 { 
 parseError :: [Token] -> a
 parseError [] = error "Unknown Parse Error" 
-parseError (t:ts) = error ("Parse error at line:column " ++ (tokenPosn t))
+parseError (t:ts) = error ("Parse error at: " ++ (tokenPosn t))
 
 type Environment = [ (String,Expr) ]
 
