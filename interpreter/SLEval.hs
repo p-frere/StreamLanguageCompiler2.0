@@ -44,7 +44,9 @@ type State = (Expr,Environment,Kontinuation)
 
 getPast :: (Meta,Meta,Meta) -> Past
 getPast (MtInCnt s, MtPstSize p, f) = generatePast s p
+getPast (MtPstSize p, MtInCnt s, f) = generatePast s p
 getPast (s, MtPst p, f) = p
+getPast (MtPst p, s, f) = p
 
 generatePast :: Int -> Int  -> Past
 generatePast strCnt pstCnt
