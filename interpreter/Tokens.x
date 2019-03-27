@@ -13,8 +13,8 @@ $eol   = [\n]
 
 -- The tokens: 
 tokens :-
-  "$".*                             ; 
-  $eol                              { tok (\p s -> TokenEndLine p) }
+  "$".*                             ;
+  $eol+                             { tok (\p s -> TokenEndLine p) }
   $white+                           ; 
   \-?$digit+                        { tok (\p s -> TokenInt p (read s)) }
   \=                                { tok (\p s -> TokenEq p) }
