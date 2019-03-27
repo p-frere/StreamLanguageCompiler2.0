@@ -14,30 +14,30 @@ $eol   = [\n]
 -- The tokens: 
 tokens :-
   "$".*                             ; 
-  $eol                              { tok (\p s -> TokenEndLine p )}
+  $eol                              { tok (\p s -> TokenEndLine p) }
   $white+                           ; 
   \-?$digit+                        { tok (\p s -> TokenInt p (read s)) }
-  \=                                { tok (\p s -> TokenEq p )}
-  \+                                { tok (\p s -> TokenPlus p ) }
+  \=                                { tok (\p s -> TokenEq p) }
+  \+                                { tok (\p s -> TokenPlus p) }
   sum                               { tok (\p s -> TokenPlus p) }
-  \-                                { tok (\p s -> TokenMinus p ) }
+  \-                                { tok (\p s -> TokenMinus p) }
   sub                               { tok (\p s -> TokenMinus p) }
-  \*                                { tok (\p s -> TokenTimes p  )}
+  \*                                { tok (\p s -> TokenTimes p) }
   mult                              { tok (\p s -> TokenTimes p) }
   \(                                { tok (\p s -> TokenLParen p) }
   \)                                { tok (\p s -> TokenRParen p) }
-  $alpha [$alpha $digit \. \_ \’]*  { tok (\p s -> TokenVar p s) } 
   \[                                { tok (\p s -> TokenLParenSq p) }
   \]                                { tok (\p s -> TokenRParenSq p) }
   \,                                { tok (\p s -> TokenSeq p ) }
-  let                               { tok (\p s -> TokenLet p )}
-  in        		                    { tok (\p s -> TokenIn p )}
+  let                               { tok (\p s -> TokenLet p) }
+  in        		                    { tok (\p s -> TokenIn p) }
   \\                                { tok (\p s -> TokenLam p) }
   lam                               { tok (\p s -> TokenLam p) }
   set                               { tok (\p s -> TokenSet p) }
   past                              { tok (\p s -> TokenPast p) }
   pastCount                         { tok (\p s -> TokenPastCount p) }
   inStreamCount                     { tok (\p s -> TokenInStreamCount p) }
+  $alpha [$alpha $digit \. \_ \’]*  { tok (\p s -> TokenVar p s) } 
 
 
 { 

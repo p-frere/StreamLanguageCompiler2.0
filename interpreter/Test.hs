@@ -13,6 +13,7 @@ main = catch main' noParse
 main' = do (fileName : _ ) <- getArgs
            sourceText <- readFile fileName
            let parsedProg = parseCalc (alexScanTokens sourceText)
+           putStrLn ("Parsed as " ++ (show parsedProg))
            let funcs = getFuncs parsedProg 
            let past = getPast parsedProg
            forever $ do  

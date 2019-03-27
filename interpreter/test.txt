@@ -1,3 +1,4 @@
-1
-1
+set pastCount = 0
+set inStreamCount = 1
+s0
 s0

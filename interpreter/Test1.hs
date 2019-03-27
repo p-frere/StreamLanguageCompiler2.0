@@ -10,8 +10,8 @@ import Data.Char
 main :: IO ()
 main = catch main' noParse
 
-main' = do putStrLn ("Toy Interactive Mode - enter an expression : ")
-           sourceText <- getLine
+main' = do (fileName : _ ) <- getArgs
+           sourceText <- readFile fileName
            let parsedProg = parseCalc (alexScanTokens sourceText)
            putStrLn ("Parsed as " ++ (show parsedProg))
            main'
