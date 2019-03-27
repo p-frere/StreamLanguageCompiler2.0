@@ -3,7 +3,9 @@ module Grammar where
 import Tokens 
 }
 
-%name parseCalc 
+%name parseCalc MetaData
+%name parseInput IntList
+
 %tokentype { Token } 
 %error { parseError }
 %token 
@@ -26,22 +28,27 @@ import Tokens
    pastCnt  { TokenPastCount _ }
    SCount   { TokenInStreamCount _ }
    eol      { TokenEndLine _ }
-   app      { TokenApp _ }
 
+--associations
 %nonassoc int var '(' ')' '[' ']' in 
 %left '+' '-'
 %left '*' 
-%right lam let app
+%right lam let
+%left APP
 
 %%
 
-Exp : Meta Meta Meta                { MtData ($1, $2, $3) }
-    | IntExprs                      { InList $1 }  
+MetaData : Meta eol Meta eol Meta       { ($1, $3, $5) }
+
+IntList : IntExprs                      { $1 }  
 
 Meta : set past '=' '[' MappingExps ']'  { MtPst $5 }
      | set pastCnt '=' int               { MtPstSize $4 }  
      | set SCount '=' int                { MtInCnt $4 }
-     | Expr                              { MtFuncs [$1] }
+     | ExprList                          { MtFuncs $1 }
+
+ExprList : Expr                      { [$1] }
+         | Expr eol ExprList         { $1 : $3 }
 
 Expr : '(' Expr ')'                  { $2 }
      | int                           { ExInt $1 }
@@ -52,10 +59,9 @@ Expr : '(' Expr ')'                  { $2 }
      | '-' '(' Expr ',' Expr ')'     { ExSub ($3) ($5) }  
      | Expr '*' Expr                 { ExMult ($1) ($3) } 
      | '*' '(' Expr ',' Expr ')'     { ExMult ($3) ($5) }
-     | app '(' Expr ',' Expr ')'     { ExApp ($3) ($5) }
+     | Expr Expr %prec APP           { ExApp ($1) ($2) } 
      | lam var '(' Expr ')'          { ExLam ($2) ($4) }
      | let var '=' Expr in Expr      { ExLet $2 $4 $6 }
-     | Expr eol Expr                 { $1, $3 }
 
 MappingExps : MappingExps ',' MappingExp            { $3 : $1 }
             | MappingExp                            { [$1] }
@@ -79,9 +85,6 @@ type Past = [Mapping]
 type FuncList = [Expr]
 type InputList = [Expr]
 type MetaData = (Meta, Meta, Meta)
-
-data Exp = MtData MetaData
-         | InList InputList
 
 data Meta = MtFuncs [Expr]
           | MtPst Past 

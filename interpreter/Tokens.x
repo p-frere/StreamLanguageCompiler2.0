@@ -4,10 +4,14 @@ module Tokens where
 
 %wrapper "posn"
 
+--digits
 $digit = 0-9
+--character
 $alpha = [a-zA-Z]
+--end of line character
 $eol   = [\n]
 
+-- The tokens: 
 tokens :-
   "$".*                             ; 
   $eol                              { tok (\p s -> TokenEndLine p )}
@@ -34,7 +38,6 @@ tokens :-
   past                              { tok (\p s -> TokenPast p) }
   pastCount                         { tok (\p s -> TokenPastCount p) }
   inStreamCount                     { tok (\p s -> TokenInStreamCount p) }
-  app                               { tok (\p s -> TokenApp p) }
 
 
 { 
@@ -56,7 +59,6 @@ data Token =
   TokenLet           AlexPosn       |
   TokenIn            AlexPosn       |
   TokenLam           AlexPosn       |
-  TokenApp           AlexPosn       |
   TokenSet           AlexPosn       |
   TokenPast          AlexPosn       |
   TokenPastCount     AlexPosn       |
@@ -85,5 +87,4 @@ tokenPosn (TokenPast (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
 tokenPosn (TokenPastCount (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
 tokenPosn (TokenInStreamCount (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
 tokenPosn (TokenEndLine (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
-tokenPosn (TokenApp (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
 }

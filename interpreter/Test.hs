@@ -10,20 +10,20 @@ import Data.Char
 main :: IO ()
 main = catch main' noParse
 
-main' = do putStrLn ("Toy Interactive Mode - enter an expression : ")
-           sourceText <- getLine
+main' = do (fileName : _ ) <- getArgs
+           sourceText <- readFile fileName
            let parsedProg = parseCalc (alexScanTokens sourceText)
            let funcs = getFuncs parsedProg 
            let past = getPast parsedProg
            forever $ do  
             l <- getLine
-            let parsedL = parseCalc (alexScanTokens l)
+            let parsedL = parseInput (alexScanTokens l)
             let past = evalIn funcs parsedL past
             print (prettyPrint (snd (head past)))
 
 
-getFuncs :: Exp -> [Expr]
-getFuncs (MtData(_,_,(MtFuncs fs))) = fs
+getFuncs :: (Meta,Meta,Meta)  -> [Expr]
+getFuncs (_,_,(MtFuncs fs)) = fs
 
 
 prettyPrint :: [Expr] -> String

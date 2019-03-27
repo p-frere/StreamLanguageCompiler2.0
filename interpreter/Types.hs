@@ -1,7 +1,5 @@
---Author: Julian Rathke, 2018 
---Provides an implementation of a type checker for the \Toy language from the lecture notes.
 module Types where 
-import Grammar
+--import Grammar
 
 --Data structures as defined in ToyGrammar:
 --data ToyType = TyInt | TyBool | TyUnit | TyPair ToyType ToyType | TyFun ToyType ToyType

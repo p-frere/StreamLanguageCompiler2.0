@@ -4348,7 +4348,7 @@ alex_actions = array (0 :: Int, 21)
   , (0,alex_action_19)
   ]
 
-{-# LINE 40 "Tokens.x" #-}
+{-# LINE 43 "Tokens.x" #-}
  
 -- Each action has type :: AlexPosn -> String -> MDLToken 
 tok f p s = f p s
@@ -4368,7 +4368,6 @@ data Token =
   TokenLet           AlexPosn       |
   TokenIn            AlexPosn       |
   TokenLam           AlexPosn       |
-  TokenApp           AlexPosn       |
   TokenSet           AlexPosn       |
   TokenPast          AlexPosn       |
   TokenPastCount     AlexPosn       |
@@ -4397,7 +4396,6 @@ tokenPosn (TokenPast (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
 tokenPosn (TokenPastCount (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
 tokenPosn (TokenInStreamCount (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
 tokenPosn (TokenEndLine (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
-tokenPosn (TokenApp (AlexPn a l c)) = show(l) ++ ":" ++ show(c)
 
 alex_action_1 =  tok (\p s -> TokenEndLine p )
 alex_action_3 =  tok (\p s -> TokenInt p (read s)) 
@@ -4422,7 +4420,6 @@ alex_action_21 =  tok (\p s -> TokenSet p)
 alex_action_22 =  tok (\p s -> TokenPast p) 
 alex_action_23 =  tok (\p s -> TokenPastCount p) 
 alex_action_24 =  tok (\p s -> TokenInStreamCount p) 
-alex_action_25 =  tok (\p s -> TokenApp p) 
 {-# LINE 1 "templates/GenericTemplate.hs" #-}
 -- -----------------------------------------------------------------------------
 -- ALEX TEMPLATE
