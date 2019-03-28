@@ -7,7 +7,7 @@
 #   
 
 # Files that need to be generated from other files
-DEPEND += Tokens.hs Grammar.hs Types.hs SlEval.hs
+DEPEND += Tokens.hs Grammar.hs Types.hs SLEval.hs
 
 # When "make" is invoked with no arguments, we build an executable 
 #  after building everything that it depends on
@@ -19,7 +19,7 @@ all: $(DEPEND) myinterpreter #Main
 
 # Build an executable for interactive mode
 myinterpreter: $(DEPEND) Test.hs
-	ghc Test.hs
+	ghc -dynamic Test.hs
 
 # Generate ML files from a parser definition file
 Grammar.hs : Grammar.y

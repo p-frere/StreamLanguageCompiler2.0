@@ -1,40 +1,14 @@
-import Tokens
--- for func
+--import Tokens for func
 --import Tokens for stream
---
-import Grammar 
---for func
+--import Grammar for func
 --import Grammar for stram
-import SLEval
+import SLEval2
 
 import System.Environment
 import Control.Exception
 import System.IO
 import Control.Monad  
 import Data.Char 
-
----- Add to Grammar then remove-- 
---data Expr = ExInt Int 
---            | ExVar String   
---            | ExSum Expr Expr 
---            | ExSub Expr Expr 
---            | ExMult Expr Expr  
---            | ExApp Expr Expr
---            | ExLam String Expr
---            | ExLet String Expr Expr deriving (Show,Eq)
-
---type Mapping = ([Expr],[Expr]) 
---type Past = [Mapping]
---type FuncList = [Expr]
---type InputList = [Expr]
-
---type MetaData = (Meta, Meta, Meta)
-
---data Meta = MtFuncs [Expr] 
---            | MtPst Past   
---            | MtPstSize Int
---            | MtInCnt Int
--------
 
 f line = putStrLn ("Hi, " ++ line ++ "!")
 

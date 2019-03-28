@@ -12,9 +12,11 @@ main = catch main' noParse
 
 main' = do (fileName : _ ) <- getArgs
            sourceText <- readFile fileName
+           --parsedProgram is a (meta, meta, meta) <- this last meta is MtFuncs[]
            let parsedProg = parseCalc (alexScanTokens sourceText)
            putStrLn ("Parsed as: " ++ (show parsedProg))
-           let funcs = getFuncs parsedProg 
+           --
+           let funcs = evalFunc parsedProg
            putStrLn ("Funcs: " ++ (show funcs))
            let past = getPast parsedProg
            putStrLn ("Inital Past: " ++ (show past))
