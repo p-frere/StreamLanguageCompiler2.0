@@ -1,5 +1,6 @@
 module SLEval where
 import Grammar
+import Debug.Trace
 --import GrammarStream
 --data Expr = ExInt Int 
 --            | ExVar String   
@@ -58,16 +59,23 @@ generatePast strCnt pstCnt
 -----------------Building lambda function from meta data-----------------
 
 evalFunc :: (Meta,Meta,Meta) -> [Expr] 
-evalFunc (MtInCnt i, MtPstSize p, MtFuncs (f:fs))
+evalFunc (MtPstSize p, MtInCnt i, MtFuncs (f:fs))
     | (fs) /= [] = (generateLam vars f) : evalFunc (MtInCnt i, MtPstSize p, MtFuncs fs)
     | otherwise = [(generateLam vars f)]
         where
             vars = generateVars i p
     
+evalFunc (MtInCnt i, MtPstSize p, MtFuncs (f:fs))
+    | (fs) /= [] = (generateLam vars f) : evalFunc (MtInCnt i, MtPstSize p, MtFuncs fs)
+    | otherwise = [(generateLam vars f)]
+        where
+            vars = generateVars i p
+
+    
 -- ExVAr -> Function -> Lam
 generateLam :: [Expr] -> Expr -> Expr
-generateLam [s] f = ExApp f s  
-generateLam (s:ss) f = (ExApp (generateLam ss f) s)
+generateLam [s] f = ExLam f s  
+generateLam (s:ss) f = (ExLam (generateLam ss f) s)
 
 -- steram count, past size -> Vars
 generateVars :: Int -> Int -> [Expr]
@@ -92,7 +100,7 @@ getPastVars s i
 -- function     streamInput         oldPast                         newPast
 -- ExLam()      [s1 s2 s3 ..]       [([1,2],[3]) ([2,3],[5])]       [([1,2],[3]) ([2,3],[5])] 
 evalIn :: FuncList -> InputList -> Past -> Past
-evalIn fs is p = updatePast is [evalLoop (buildExpr f is p)| f <- fs] p
+evalIn fs is p = updatePast is [evalLoop ( trace ("buildExpr: " ++ show f ++ " - " ++ show is ++ " - " ++ show p) buildExpr f is p)| f <- fs ] p
 
 -- add new pairing to past window
 --              ins         outs    oldPAst newPast
@@ -114,16 +122,16 @@ buildExpr f is p =  wrapIns f (is++(orderPast p))
 
 ---------Solve lambda with eval------------------------------------
 -- Function to iterate the small step reduction to termination
-evalLoop :: Expr -> Expr 
-evalLoop e = evalLoop' (e,[],[])
-    where evalLoop' (e,env,k) = if (e' == e) && (k' == []) && (isValue e') then e' else evalLoop' (e',env',k')
-                    where (e',env',k') = eval1 (e,env,k) 
+--evalLoop :: Expr -> Expr 
+--evalLoop e = evalLoop' (e,[],[])
+--    where evalLoop' (e,env,k) = if (e' == e) && (k' == []) && (isValue e') then e' else evalLoop' (e',env',k')
+--                    where (e',env',k') = eval1 (e,env,k) 
 
 -- -- Debug version of evalLoop
--- evalLoopT :: Expr -> Expr 
--- evalLoopT e = evalLoop' (e,[],[])
---     where evalLoop' (e,env,k) = if (e' == e) && (k' == []) && (isValue e') then e' else trace (show e' ++ " - " ++ show env' ++ " - " ++ show k') evalLoop' (e',env',k')
---                     where (e',env',k') = eval1 (e,env,k) 
+evalLoop :: Expr -> Expr 
+evalLoop e = evalLoop' (e,[],[])
+    where evalLoop' (e,env,k) = if (e' == e) && (k' == []) && (isValue e') then e' else trace ("evalLoop1: " ++ show e' ++ " - " ++ show env' ++ " - " ++ show k') evalLoop' (e',env',k')
+                    where (e',env',k') = trace ("evalLp: " ++ show e ++ " - " ++ show env ++ " - " ++ show k) eval1 (e,env,k) 
 
 -- Gets an expression and it's enviroment associated with a variable
 getValueBinding :: String -> Environment -> (Expr,Environment)
