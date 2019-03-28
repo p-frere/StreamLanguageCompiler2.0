@@ -74,8 +74,8 @@ evalFunc (MtInCnt i, MtPstSize p, MtFuncs (f:fs))
     
 -- ExVAr -> Function -> Lam
 generateLam :: [Expr] -> Expr -> Expr
-generateLam [s] f = ExLam f s  
-generateLam (s:ss) f = (ExLam (generateLam ss f) s)
+generateLam [ExVar s] f = ExLam s f  
+generateLam ((ExVar s):ss) f = (ExLam s (generateLam ss f))
 
 -- steram count, past size -> Vars
 generateVars :: Int -> Int -> [Expr]
