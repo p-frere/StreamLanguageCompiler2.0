@@ -13,15 +13,19 @@ main = catch main' noParse
 main' = do (fileName : _ ) <- getArgs
            sourceText <- readFile fileName
            let parsedProg = parseCalc (alexScanTokens sourceText)
-           putStrLn ("Parsed as " ++ (show parsedProg))
+           putStrLn ("Parsed as: " ++ (show parsedProg))
            let funcs = getFuncs parsedProg 
+           putStrLn ("Funcs: " ++ (show funcs))
            let past = getPast parsedProg
+           putStrLn ("Inital Past: " ++ (show past))
            forever $ do  
             l <- getLine
             let parsedL = parseInput (alexScanTokens l)
-            --let past = evalIn funcs parsedL past
-            --print (prettyPrint (snd (head past)))
-            putStrLn ("Parsed as " ++ (show parsedL))
+            putStrLn ("Input: " ++ (show parsedL))
+            let past = evalIn funcs parsedL past
+            putStrLn ("Evaluated: " ++ (show past))
+            print (prettyPrint (snd (head past)))
+            hPutStr stdout (prettyPrint (snd (head past)))
 
 
 getFuncs :: (Meta,Meta,Meta)  -> [Expr]
