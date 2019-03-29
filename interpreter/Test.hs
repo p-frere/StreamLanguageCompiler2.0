@@ -21,7 +21,6 @@ main' = do (fileName : _ ) <- getArgs
            putStrLn ("Inital Past: " ++ (show past))
            let funcs = evalFunc parsedProg
            putStrLn ("Funcs: " ++ (show funcs))
-
            forever $ do
             l <- getLine
             let parsedL = parseInput (alexScanTokens l)
