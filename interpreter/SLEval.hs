@@ -2,18 +2,18 @@ module SLEval where
 import Grammar
 import Debug.Trace
 --import GrammarStream
---data Expr = ExInt Int 
---            | ExVar String   
---            | ExSum Expr Expr 
---            | ExSub Expr Expr 
---            | ExMult Expr Expr  
+--data Expr = ExInt Int
+--            | ExVar String
+--            | ExSum Expr Expr
+--            | ExSub Expr Expr
+--            | ExMult Expr Expr
 --            | Cl String Expr Environment
 --            | ExApp Expr Expr
 --            | ExLam String Expr
 --            | ExLet String Expr Expr deriving (Show,Eq)
 
 type Configuration = (Expr,Environment,Kontinuation)
---type Environment = [ (String,Expr) ] 
+--type Environment = [ (String,Expr) ]
 
 -- Holds the expresion in the kontinuation in a partially evaluated form
 data Frame =    SumH_ Expr Environment | Sum_H Expr
@@ -33,76 +33,70 @@ type State = (Expr,Environment,Kontinuation)
 -- cnt past func
 --type MetaData = (Meta, Meta, Meta)
 
---data Meta = MtFuncs [Expr] 
---            | MtPst Past   
+--data Meta = MtFuncs [Expr]
+--            | MtPst Past
 --            | MtPstSize Int
 --            | MtInCnt Int
 ----------------past processing-------------------------
 
 --getPast :: (Meta,Meta,Meta) -> Past
---getPast (MtPstSize s, MtPstSize p, f) = generatePast s p
+--getPast (MtPstSize s, generatePast s p, f) = generatePast s p
 --getPast (s, MtPst p, f) = p
 
 getPast :: (Meta,Meta,Meta) -> Past
-getPast (MtInCnt s, MtPstSize p, f) = generatePast s p
-getPast (MtPstSize p, MtInCnt s, f) = generatePast s p
-getPast (s, MtPst p, f) = p
+-- getPast (MtPstSize p, MtInCnt s, f) = (MtPst (generatePast s p), MtInCnt s, f)
 getPast (MtPst p, s, f) = p
+
+updateMeta :: (Meta,Meta,Meta) -> (Meta,Meta,Meta)
+updateMeta (MtPstSize p, MtInCnt s, f) = (MtPst (generatePast s p), MtInCnt s, f)
+updateMeta (MtPst p, s, f) = (MtPst p, s, f)
+
 
 generatePast :: Int -> Int  -> Past
 generatePast strCnt pstCnt
     | pstCnt > 0  = (replicate0 strCnt,replicate0 strCnt) : generatePast strCnt (pstCnt-1)
     | otherwise = []
-    where 
+    where
         replicate0 n = map (\x -> ExInt x) (replicate n 0)
 
 -----------------Building lambda function from meta data-----------------
 
-evalFunc :: (Meta,Meta,Meta) -> [Expr] 
-evalFunc (MtPstSize p, MtInCnt i, MtFuncs (f:fs))
-    | (fs) /= [] = (generateLam vars f) : evalFunc (MtInCnt i, MtPstSize p, MtFuncs fs)
+evalFunc :: (Meta,Meta,Meta) -> [Expr]
+evalFunc (MtPst p, MtInCnt i, MtFuncs (f:fs))
+    | (fs) /= [] = (generateLam vars f) : evalFunc (MtInCnt i, MtPst p, MtFuncs fs)
     | otherwise = [(generateLam vars f)]
         where
-            vars = generateVars i p
-    
-evalFunc (MtInCnt i, MtPstSize p, MtFuncs (f:fs))
-    | (fs) /= [] = (generateLam vars f) : evalFunc (MtInCnt i, MtPstSize p, MtFuncs fs)
-    | otherwise = [(generateLam vars f)]
-        where
-            vars = generateVars i p
+            vars = generateVars i (length p)
 
-    
 -- ExVAr -> Function -> Lam
 generateLam :: [Expr] -> Expr -> Expr
-generateLam [ExVar s] f = ExLam s f  
+generateLam [ExVar s] f = ExLam s f
 generateLam ((ExVar s):ss) f = (ExLam s (generateLam ss f))
 
 -- steram count, past size -> Vars
 generateVars :: Int -> Int -> [Expr]
 generateVars s p  =  (makeMap streamVars) ++ streamVars
-    where   
-        streamVars = (getStreamVars s) 
-        makeMap ((ExVar sv):svs) 
+    where
+        streamVars = (getStreamVars s)
+        makeMap ((ExVar sv):svs)
             | svs /= [] = getPastVars sv p ++ makeMap (svs)
             | otherwise = getPastVars sv p
 
 getStreamVars :: Int -> [Expr]
-getStreamVars i 
-    | i > 0 = [ExVar ("s"++show i)] ++ getStreamVars (i-1)
+getStreamVars i
+    | i > 0 = [ExVar ("s"++show (i-1))] ++ getStreamVars (i-1)
     | otherwise = []
 
 getPastVars :: String -> Int -> [Expr]
-getPastVars s i 
+getPastVars s i
     | i > 0 = [ExVar (s++".out"++show i)] ++ [ExVar (s++".in"++show i)] ++ getPastVars s (i-1)
     | otherwise = []
 
 ----------Applying Apps to lambda and calling eval--------------------
 -- function     streamInput         oldPast                         newPast
--- ExLam()      [s1 s2 s3 ..]       [([1,2],[3]) ([2,3],[5])]       [([1,2],[3]) ([2,3],[5])] 
+-- ExLam()      [s1 s2 s3 ..]       [([1,2],[3]) ([2,3],[5])]       [([1,2],[3]) ([2,3],[5])]
 evalIn :: FuncList -> InputList -> Past -> Past
 evalIn fs is p = updatePast is [evalLoop (buildExpr f is p)| f <- fs ] p
-
---trace ("buildExpr: " ++ show f ++ " - " ++ show is ++ " - " ++ show p) 
 
 -- add new pairing to past window
 --              ins         outs    oldPAst newPast
@@ -112,34 +106,34 @@ updatePast is os p = (is,os) : init p
 -- func ins past
 buildExpr ::  Expr -> InputList -> Past -> Expr
 buildExpr f is p =  wrapIns f (is++(orderPast p))
-    where 
+    where
         wrapIns :: Expr -> [Expr] -> Expr
         wrapIns f (i:is)
             | null is = ExApp f i
-            | otherwise = ExApp (wrapIns f is) i  
-    
+            | otherwise = ExApp (wrapIns f is) i
+
         orderPast :: Past -> [Expr]
         orderPast [] = []
         orderPast (x:xs) = fst x ++ snd x ++ orderPast xs
 
 ---------Solve lambda with eval------------------------------------
 -- Function to iterate the small step reduction to termination
-evalLoop :: Expr -> Expr 
+evalLoop :: Expr -> Expr
 evalLoop e = evalLoop' (e,[],[])
     where evalLoop' (e,env,k) = if (e' == e) && (k' == []) && (isValue e') then e' else evalLoop' (e',env',k')
-                    where (e',env',k') = eval1 (e,env,k) 
+                    where (e',env',k') = eval1 (e,env,k)
 
 -- -- Debug version of evalLoop
---evalLoop :: Expr -> Expr 
+--evalLoop :: Expr -> Expr
 --evalLoop e = evalLoop' (e,[],[])
 --    where evalLoop' (e,env,k) = if (e' == e) && (k' == []) && (isValue e') then e' else evalLoop' (e',env',k')
---                    where (e',env',k') = eval1 (e,env,k) 
+--                    where (e',env',k') = eval1 (e,env,k)
 
 -- Gets an expression and it's enviroment associated with a variable
 getValueBinding :: String -> Environment -> (Expr,Environment)
 getValueBinding x [] = error "Variable binding not found"
 getValueBinding x ((y,e):env) | x == y  = unpack e env
-                            | otherwise = getValueBinding x env   
+                            | otherwise = getValueBinding x env
 
 -- Gets the expr and new enviroment
 unpack :: Expr -> Environment -> (Expr,Environment)
@@ -152,7 +146,7 @@ unpack e env = (e,env)
 -- unpack (Cl x e env1) = ((Cl x e env1), env1)
 -- unpack e = (e,[])
 
--- Pairs a variable's value and it's enviroment 
+-- Pairs a variable's value and it's enviroment
 update :: Environment -> String -> Expr -> Environment
 update env x e = (x,e) : env
 --update env x e1 y e2 = (x,e1):(y,e2):env
@@ -161,7 +155,7 @@ update env x e = (x,e) : env
 ----------- Evaluation functions ----------------------------
 
 eval1 :: State -> State
-eval1 ((ExVar x),env,k) = (e',env',k) 
+eval1 ((ExVar x),env,k) = (e',env',k)
                 where (e',env') = getValueBinding x env
 
 -- Function decleration, f = e1 in e2
@@ -197,11 +191,11 @@ isValue :: Expr -> Bool
 isValue (ExInt _) = True
 isValue (Cl _ _ _) = True
 
-unparse :: [Expr] -> String 
+unparse :: [Expr] -> String
 unparse [] = ""
 unparse ((ExInt n):ns) = show n ++ ", " ++ unparse ns
 unparse (n:ns) = "Unknown" ++ ", " ++ unparse ns
 
--- unparse :: Expr -> String 
+-- unparse :: Expr -> String
 -- unparse (ExInt n) = show n
 -- unparse _ = "Unknown"
