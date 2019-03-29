@@ -16,7 +16,7 @@ main' = do (fileName : _ ) <- getArgs
            let parsedProg = parseCalc (alexScanTokens sourceText)
            putStrLn ("Parsed as: " ++ (show parsedProg))
            --
-           let funcs = evalFunc parsedProg
+           let funcs = [ExLam "s0" (ExVar "s0"),ExLam "s0" (ExVar "s0")]
            putStrLn ("Funcs: " ++ (show funcs))
            let past = getPast parsedProg
            putStrLn ("Inital Past: " ++ (show past))
