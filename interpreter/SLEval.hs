@@ -50,7 +50,8 @@ getPast (MtPst p, s, f) = p
 updateMeta :: (Meta,Meta,Meta) -> (Meta,Meta,Meta)
 updateMeta (MtPstSize p, MtInCnt s, f) = (MtPst (generatePast s p), MtInCnt s, f)
 updateMeta (MtPst p, s, f) = (MtPst p, s, f)
-
+updateMeta (MtInCnt s,MtPstSize p,f) = (MtPst (generatePast s p), MtInCnt s, f)
+updateMeta (s, MtPst p, f) = (MtPst p, s, f)
 
 generatePast :: Int -> Int  -> Past
 generatePast strCnt pstCnt
