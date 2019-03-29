@@ -40,14 +40,17 @@ type State = (Expr,Environment,Kontinuation)
 ----------------past processing-------------------------
 
 --getPast :: (Meta,Meta,Meta) -> Past
---getPast (MtPstSize s, MtPstSize p, f) = generatePast s p
+--getPast (MtPstSize s, generatePast s p, f) = generatePast s p
 --getPast (s, MtPst p, f) = p
 
 getPast :: (Meta,Meta,Meta) -> Past
-getPast (MtInCnt s, MtPstSize p, f) = generatePast s p
-getPast (MtPstSize p, MtInCnt s, f) = generatePast s p
-getPast (s, MtPst p, f) = p
+-- getPast (MtPstSize p, MtInCnt s, f) = (MtPst (generatePast s p), MtInCnt s, f)
 getPast (MtPst p, s, f) = p
+
+updateMeta :: (Meta,Meta,Meta) -> (Meta,Meta,Meta)
+updateMeta (MtPstSize p, MtInCnt s, f) = (MtPst (generatePast s p), MtInCnt s, f)
+updateMeta (MtPst p, s, f) = (MtPst p, s, f)
+
 
 generatePast :: Int -> Int  -> Past
 generatePast strCnt pstCnt
@@ -59,19 +62,12 @@ generatePast strCnt pstCnt
 -----------------Building lambda function from meta data-----------------
 
 evalFunc :: (Meta,Meta,Meta) -> [Expr] 
-evalFunc (MtPstSize p, MtInCnt i, MtFuncs (f:fs))
-    | (fs) /= [] = (generateLam vars f) : evalFunc (MtInCnt i, MtPstSize p, MtFuncs fs)
+evalFunc (MtPst p, MtInCnt i, MtFuncs (f:fs))
+    | (fs) /= [] = (generateLam vars f) : evalFunc (MtInCnt i, MtPst p, MtFuncs fs)
     | otherwise = [(generateLam vars f)]
         where
-            vars = generateVars i p
-    
-evalFunc (MtInCnt i, MtPstSize p, MtFuncs (f:fs))
-    | (fs) /= [] = (generateLam vars f) : evalFunc (MtInCnt i, MtPstSize p, MtFuncs fs)
-    | otherwise = [(generateLam vars f)]
-        where
-            vars = generateVars i p
+            vars = generateVars i (length p)
 
-    
 -- ExVAr -> Function -> Lam
 generateLam :: [Expr] -> Expr -> Expr
 generateLam [ExVar s] f = ExLam s f  
@@ -88,7 +84,7 @@ generateVars s p  =  (makeMap streamVars) ++ streamVars
 
 getStreamVars :: Int -> [Expr]
 getStreamVars i 
-    | i > 0 = [ExVar ("s"++show i)] ++ getStreamVars (i-1)
+    | i > 0 = [ExVar ("s"++show (i-1))] ++ getStreamVars (i-1)
     | otherwise = []
 
 getPastVars :: String -> Int -> [Expr]
@@ -100,7 +96,7 @@ getPastVars s i
 -- function     streamInput         oldPast                         newPast
 -- ExLam()      [s1 s2 s3 ..]       [([1,2],[3]) ([2,3],[5])]       [([1,2],[3]) ([2,3],[5])] 
 evalIn :: FuncList -> InputList -> Past -> Past
-evalIn fs is p = updatePast is [evalLoop ( trace ("buildExpr: " ++ show f ++ " - " ++ show is ++ " - " ++ show p) buildExpr f is p)| f <- fs ] p
+evalIn fs is p = updatePast is [evalLoop (buildExpr f is p)| f <- fs ] p
 
 -- add new pairing to past window
 --              ins         outs    oldPAst newPast

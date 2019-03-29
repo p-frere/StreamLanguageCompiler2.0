@@ -15,17 +15,19 @@ main' = do (fileName : _ ) <- getArgs
            --parsedProgram is a (meta, meta, meta) <- this last meta is MtFuncs[]
            let parsedProg = parseCalc (alexScanTokens sourceText)
            putStrLn ("Parsed as: " ++ (show parsedProg))
+           let parsedProg1 = updateMeta parsedProg
            --
+           let past = getPast parsedProg1
+           putStrLn ("Inital Past: " ++ (show past))
            let funcs = evalFunc parsedProg
            putStrLn ("Funcs: " ++ (show funcs))
-           let past = getPast parsedProg
-           putStrLn ("Inital Past: " ++ (show past))
+           
            forever $ do  
             l <- getLine
             let parsedL = parseInput (alexScanTokens l)
             putStrLn ("Input: " ++ (show parsedL))
-            let past = evalIn funcs parsedL past
-            putStrLn ("Evaluated: " ++ (show past))
+            let past1 = evalIn funcs parsedL past
+            --putStrLn ("Evaluated: " ++ (show past1))
             print (prettyPrint (snd (head past)))
             hPutStr stdout (prettyPrint (snd (head past)))
 
