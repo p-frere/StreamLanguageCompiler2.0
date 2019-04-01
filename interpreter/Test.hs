@@ -1,6 +1,7 @@
 import Tokens
 import Grammar
 import SLEval
+import Types
 import System.Environment
 import Control.Exception
 import System.IO
@@ -23,6 +24,11 @@ main' = do (fileName : _ ) <- getArgs
            putStrLn ("Inital Past: " ++ (show past))
            let funcs = evalFunc parsedProg1
            putStrLn ("Funcs: " ++ (show funcs))
+
+
+           let typedProg = typeCheck funcs
+           putStrLn ("Type Checking Passed with type " ++ (unparseTypeCheck typedProg) ++ "\n")
+
            result <- getUserInputs funcs past
            putStrLn (show result)
         --    forever $ do
@@ -50,8 +56,13 @@ parseInput1 :: String -> Maybe String
 --parseInput1 input = (Just input):: Maybe String
 parseInput1 input = if input == "exit" then Nothing else (Just input):: Maybe String
 
+typeCheck :: [Expr] -> [ExType]
+typeCheck (x:xs) = (typeOf [] x):(typeCheck xs)
+typeCheck [] = []
 
-
+unparseTypeCheck :: [ExType] -> String
+unparseTypeCheck (x:xs) = unparseType x ++ unparseTypeCheck xs
+unparseTypeCheck [] = ""
 
 
 getFuncs :: (Meta,Meta,Meta)  -> [Expr]
