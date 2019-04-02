@@ -1,4 +1,4 @@
 set inStreamCount = 2
-set pastCount = 0
+set pastCount = 1
 
 s1 * 3 + s0
