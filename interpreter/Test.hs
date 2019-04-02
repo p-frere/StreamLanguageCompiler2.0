@@ -25,6 +25,7 @@ main' = do (fileName : _ ) <- getArgs
            putStrLn ("Funcs: " ++ (show funcs))
            result <- getUserInputs funcs past 
            putStrLn (show result)
+       
         --    forever $ do  
         --     l <- getLine
         --     let parsedL = parseInput (alexScanTokens l)
@@ -49,10 +50,7 @@ parseInput1 :: String -> Maybe String
 --parseInput1 input = if input == "exit" then Nothing else (readMaybe input):: Maybe String
 --parseInput1 input = (Just input):: Maybe String
 parseInput1 input = if input == "exit" then Nothing else (Just input):: Maybe String
-
-
-        
-                
+              
 
 getFuncs :: (Meta,Meta,Meta)  -> [Expr]
 getFuncs (_,_,(MtFuncs fs)) = fs
@@ -64,7 +62,7 @@ prettyPrint ((Grammar.ExInt x):xs)
     | ((Grammar.ExInt x):xs) /= []  = show x
 
 
-    
+
 
 noParse :: ErrorCall -> IO ()
 noParse e = do let err =  show e
