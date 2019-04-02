@@ -64,17 +64,19 @@ generatePast strCnt pstCnt
 
 evalFunc :: (Meta,Meta,Meta) -> [Expr] 
 evalFunc (MtPst p, MtInCnt i, MtFuncs (f:fs))
-    | (fs) /= [] = (generateLam vars f) : evalFunc (MtInCnt i, MtPst p, MtFuncs fs)
+    | (fs) /= [] = (generateLam vars f) : evalFunc (MtPst p, MtInCnt i, MtFuncs fs)
     | otherwise = [(generateLam vars f)]
         where
             vars = generateVars i (length p)
+
+
 
 -- ExVAr -> Function -> Lam
 generateLam :: [Expr] -> Expr -> Expr
 generateLam [ExVar s] f = ExLam s f  
 generateLam ((ExVar s):ss) f = (ExLam s (generateLam ss f))
 
--- steram count, past size -> Vars
+-- stream count, past size -> Vars
 generateVars :: Int -> Int -> [Expr]
 generateVars s p  =  (makeMap streamVars) ++ streamVars
     where   
@@ -102,6 +104,7 @@ evalIn fs is p = updatePast is [evalLoop (buildExpr f is p)| f <- fs ] p
 -- add new pairing to past window
 --              ins         outs    oldPAst newPast
 updatePast :: InputList -> [Expr] -> Past -> Past
+--updatePast is os [] = []
 updatePast is os p = (is,os) : init p
 
 -- func ins past
