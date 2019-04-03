@@ -26,8 +26,8 @@ main' = do (fileName : _ ) <- getArgs
            putStrLn ("Funcs: " ++ (show funcs))
 
 
-           let typedProg = typeCheck funcs
-           putStrLn ("Type Checking Passed with type " ++ (unparseTypeCheck typedProg) ++ "\n")
+           --let typedProg = typeCheck funcs
+           --putStrLn ("Type Checking Passed with type " ++ (unparseTypeCheck typedProg) ++ "\n")
 
            result <- getUserInputs funcs past
            putStrLn (show result)
@@ -57,13 +57,13 @@ parseInput1 :: String -> Maybe String
 --parseInput1 input = (Just input):: Maybe String
 parseInput1 input = if input == "exit" then Nothing else (Just input):: Maybe String
 
-typeCheck :: [Expr] -> [ExType]
-typeCheck (x:xs) = (typeOf [] x):(typeCheck xs)
-typeCheck [] = []
-
-unparseTypeCheck :: [ExType] -> String
-unparseTypeCheck (x:xs) = unparseType x ++ unparseTypeCheck xs
-unparseTypeCheck [] = ""
+--typeCheck :: [Expr] -> [ExType]
+--typeCheck (x:xs) = (typeOf [] x):(typeCheck xs)
+--typeCheck [] = []
+--
+--unparseTypeCheck :: [ExType] -> String
+--unparseTypeCheck (x:xs) = unparseType x ++ unparseTypeCheck xs
+--unparseTypeCheck [] = ""
 
 
 getFuncs :: (Meta,Meta,Meta)  -> [Expr]
