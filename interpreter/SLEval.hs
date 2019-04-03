@@ -48,14 +48,15 @@ getPast :: (Meta,Meta,Meta) -> Past
 getPast (MtPst p, s, f) = p
 
 updateMeta :: (Meta,Meta,Meta) -> (Meta,Meta,Meta)
-updateMeta (MtPstSize p, MtInCnt s, f) = (MtPst (generatePast s p), MtInCnt s, f)
+updateMeta (MtPstSize p, MtInCnt s, MtFuncs f) = (MtPst (generatePast s (length f) p), MtInCnt s, MtFuncs f)
 updateMeta (MtPst p, s, f) = (MtPst p, s, f)
-updateMeta (MtInCnt s,MtPstSize p,f) = (MtPst (generatePast s p), MtInCnt s, f)
+updateMeta (MtInCnt s,MtPstSize p,MtFuncs f) = (MtPst (generatePast s (length f) p), MtInCnt s, MtFuncs f)
 updateMeta (s, MtPst p, f) = (MtPst p, s, f)
 
-generatePast :: Int -> Int  -> Past
-generatePast strCnt pstCnt
-    | pstCnt > 0  = (replicate0 strCnt,replicate0 strCnt) : generatePast strCnt (pstCnt-1)
+-- incnt outcnt pstcnt
+generatePast :: Int -> Int -> Int -> Past
+generatePast inCnt outCnt pstCnt
+    | pstCnt > 0  = (replicate0 inCnt,replicate0 outCnt) : generatePast inCnt outCnt (pstCnt-1)
     | otherwise = []
     where
         replicate0 n = map (\x -> ExInt x) (replicate n 0)
@@ -63,35 +64,54 @@ generatePast strCnt pstCnt
 -----------------Building lambda function from meta data-----------------
 
 evalFunc :: (Meta,Meta,Meta) -> [Expr]
-evalFunc (MtPst p, MtInCnt i, MtFuncs (f:fs))
-    | (fs) /= [] = (generateLam vars f) : evalFunc (MtInCnt i, MtPst p, MtFuncs fs)
+evalFunc (m1,m2,MtFuncs f) = evalFunc1 (m1,m2,MtFuncs f,length f)
+
+evalFunc1 :: (Meta,Meta,Meta, Int) -> [Expr]
+evalFunc1 (MtPst p, MtInCnt i, MtFuncs (f:fs), n)
+    | (fs) /= [] = (generateLam vars f) : evalFunc1 (MtPst p, MtInCnt i, MtFuncs fs, n)
     | otherwise = [(generateLam vars f)]
         where
-            vars = generateVars i (length p)
+            vars = generateVars i n (length p)
+
+
 
 -- ExVAr -> Function -> Lam
 generateLam :: [Expr] -> Expr -> Expr
 generateLam [ExVar s] f = ExLam s f
 generateLam ((ExVar s):ss) f = (ExLam s (generateLam ss f))
 
--- steram count, past size -> Vars
-generateVars :: Int -> Int -> [Expr]
-generateVars s p  =  (makeMap streamVars) ++ streamVars
+-- stream countin, stream count out, past size -> Vars
+generateVars :: Int -> Int -> Int -> [Expr]
+generateVars sin sout p  =  (makeMapOut streamOutVars) ++ (makeMapIn streamInVars) ++ streamInVars
     where
-        streamVars = (getStreamVars s)
-        makeMap ((ExVar sv):svs)
-            | svs /= [] = getPastVars sv p ++ makeMap (svs)
-            | otherwise = getPastVars sv p
+        streamInVars = (getStreamVars sin)
+        streamOutVars = (getStreamVars sout)
+        makeMapIn ((ExVar sv):svs)
+            | svs /= [] = getPastVarsIn sv p ++ makeMapIn (svs)
+            | otherwise = getPastVarsIn sv p
+        makeMapOut ((ExVar sv):svs)
+            | svs /= [] = getPastVarsOut sv p ++ makeMapOut (svs)
+            | otherwise = getPastVarsOut sv p
+
+getPastVarsIn :: String -> Int -> [Expr]
+getPastVarsIn s i
+    | i > 0 = [ExVar (s++".in"++show i)] ++ getPastVarsIn s (i-1)
+    | otherwise = []
+
+getPastVarsOut :: String -> Int -> [Expr]
+getPastVarsOut s i
+    | i > 0 = [ExVar (s++".out"++show i)] ++ getPastVarsOut s (i-1)
+    | otherwise = []
 
 getStreamVars :: Int -> [Expr]
 getStreamVars i
     | i > 0 = [ExVar ("s"++show (i-1))] ++ getStreamVars (i-1)
     | otherwise = []
 
-getPastVars :: String -> Int -> [Expr]
-getPastVars s i
-    | i > 0 = [ExVar (s++".out"++show i)] ++ [ExVar (s++".in"++show i)] ++ getPastVars s (i-1)
-    | otherwise = []
+-- getPastVars :: String -> Int -> [Expr]
+-- getPastVars s i
+--     | i > 0 = [ExVar (s++".out"++show i)] ++ [ExVar (s++".in"++show i)] ++ getPastVars s (i-1)
+--     | otherwise = []
 
 ----------Applying Apps to lambda and calling eval--------------------
 -- function     streamInput         oldPast                         newPast
@@ -102,20 +122,25 @@ evalIn fs is p = updatePast is [evalLoop (buildExpr f is p)| f <- fs ] p
 -- add new pairing to past window
 --              ins         outs    oldPAst newPast
 updatePast :: InputList -> [Expr] -> Past -> Past
+--updatePast is os [] = []
 updatePast is os p = (is,os) : init p
 
 -- func ins past
 buildExpr ::  Expr -> InputList -> Past -> Expr
-buildExpr f is p =  wrapIns f (is++(orderPast p))
+buildExpr f is p =  wrapIns f (is++(orderPastIn p)++(orderPastOut p))
     where
         wrapIns :: Expr -> [Expr] -> Expr
         wrapIns f (i:is)
             | null is = ExApp f i
             | otherwise = ExApp (wrapIns f is) i
 
-        orderPast :: Past -> [Expr]
-        orderPast [] = []
-        orderPast (x:xs) = fst x ++ snd x ++ orderPast xs
+        orderPastIn :: Past -> [Expr]
+        orderPastIn [] = []
+        orderPastIn (x:xs) = fst x ++ orderPastIn xs
+
+        orderPastOut :: Past -> [Expr]
+        orderPastOut [] = []
+        orderPastOut (x:xs) = snd x ++ orderPastOut xs
 
 ---------Solve lambda with eval------------------------------------
 -- Function to iterate the small step reduction to termination

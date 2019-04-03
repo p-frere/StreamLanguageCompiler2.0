@@ -31,6 +31,7 @@ main' = do (fileName : _ ) <- getArgs
 
            result <- getUserInputs funcs past
            putStrLn (show result)
+
         --    forever $ do
         --     l <- getLine
         --     let parsedL = parseInput (alexScanTokens l)
