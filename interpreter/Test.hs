@@ -43,7 +43,7 @@ main' = do (fileName : _ ) <- getArgs
         --     --print (prettyPrint (snd (head past1)))
         --     --hPutStr stdout (prettyPrint (snd (head past1)))
 
-
+ 
 getUserInputs f p = do
     input <- hGetLine stdin
     ifM isEOF (return ())
