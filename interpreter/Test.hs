@@ -16,21 +16,22 @@ main' = do (fileName : _ ) <- getArgs
            sourceText <- readFile fileName
            --parsedProgram is a (meta, meta, meta) <- this last meta is MtFuncs[]
            let parsedProg = parseCalc (alexScanTokens sourceText)
-           putStrLn ("Parsed as: " ++ (show parsedProg))
+           --putStrLn ("Parsed as: " ++ (show parsedProg))
            let parsedProg1 = updateMeta parsedProg
-           putStrLn ("Parsed as: " ++ (show parsedProg1))
+           --putStrLn ("Parsed as: " ++ (show parsedProg1))
            --
            let past = getPast parsedProg1
-           putStrLn ("Inital Past: " ++ (show past))
+           --putStrLn ("Inital Past: " ++ (show past))
            let funcs = evalFunc parsedProg1
-           putStrLn ("Funcs: " ++ (show funcs))
+           --putStrLn ("Funcs: " ++ (show funcs))
 
-
-           --let typedProg = typeCheck funcs
+           let typedProg = typeCheck funcs
            --putStrLn ("Type Checking Passed with type " ++ (unparseTypeCheck typedProg) ++ "\n")
 
            result <- getUserInputs funcs past
-           putStrLn (show result)
+           --putStrLn (show result)
+
+           putStr (outputToPrettyPrint result)
 
         --    forever $ do
         --     l <- getLine
@@ -57,13 +58,13 @@ parseInput1 :: String -> Maybe String
 --parseInput1 input = (Just input):: Maybe String
 parseInput1 input = if input == "exit" then Nothing else (Just input):: Maybe String
 
---typeCheck :: [Expr] -> [ExType]
---typeCheck (x:xs) = (typeOf [] x):(typeCheck xs)
---typeCheck [] = []
---
---unparseTypeCheck :: [ExType] -> String
---unparseTypeCheck (x:xs) = unparseType x ++ unparseTypeCheck xs
---unparseTypeCheck [] = ""
+typeCheck :: [Expr] -> [ExType]
+typeCheck (x:xs) = (typeOf [] x):(typeCheck xs)
+typeCheck [] = []
+
+unparseTypeCheck :: [ExType] -> String
+unparseTypeCheck (x:xs) = unparseType x ++ unparseTypeCheck xs
+unparseTypeCheck [] = ""
 
 
 getFuncs :: (Meta,Meta,Meta)  -> [Expr]
@@ -71,11 +72,17 @@ getFuncs (_,_,(MtFuncs fs)) = fs
 
 
 prettyPrint :: [Expr] -> String
-prettyPrint ((Grammar.ExInt x):xs)
+prettyPrint ((Grammar.ExInt x):xs)    
     | xs /= [] = show x ++ " " ++ prettyPrint xs
-    | ((Grammar.ExInt x):xs) /= []  = show x
+    | ((Grammar.ExInt x):xs) /= []  = show x    
 
+outputToPrettyPrint :: [Past] -> String
+outputToPrettyPrint (m:ms) = outputToPrettyPrint1 m ++ outputToPrettyPrint ms
+outputToPrettyPrint _ = ""
 
+outputToPrettyPrint1 :: Past -> String
+outputToPrettyPrint1 ( (_,xs):ns) = prettyPrint (xs) ++ "\n"
+outputToPrettyPrint1 _ = ""
 
 
 noParse :: ErrorCall -> IO ()

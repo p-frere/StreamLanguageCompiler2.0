@@ -1,30 +1,6 @@
 module Types where 
 import Grammar
 
---type Environment = [ (String,Expr) ]
-
---type Mapping = ([Expr],[Expr])
---type Past = [Mapping]
---type FuncList = [Expr]
---type InputList = [Expr]
---type MetaData = (Meta, Meta, Meta)
-
---data Meta = MtFuncs [Expr]
---          | MtPst Past 
---          | MtPstSize Int
---          | MtInCnt Int
-
---data Expr = ExInt Int 
---          | ExVar String 
---          | ExSum Expr Expr 
---          | ExSub Expr Expr 
---          | ExMult Expr Expr  
---          | ExApp Expr Expr
---          | ExLam String Expr
---          | ExLet String Expr Expr 
---          | Cl String Expr Environment
-
-
 data ExType = TyExInt
             | ExFun ExType
             deriving (Show,Eq)
@@ -71,16 +47,6 @@ typeOf tenv (ExLet x e1 e2) | TyExInt == t1 = typeOf (addBinding x TyExInt tenv)
 
 
 typeOf tenv _ = error "Type Error"
-
-
-  
-
-
-
-
-
-
-
 
 -- Function for printing the results of the TypeCheck
 unparseType :: ExType -> String
