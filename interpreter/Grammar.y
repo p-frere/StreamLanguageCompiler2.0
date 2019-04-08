@@ -28,6 +28,7 @@ import Tokens
    pastCnt  { TokenPastCount _ }
    SCount   { TokenInStreamCount _ }
    eol      { TokenEndLine _ }
+   eof      { TokenEndFile _ }
 
 --associations
 %nonassoc int var '(' ')' '[' ']' in 
@@ -41,6 +42,8 @@ import Tokens
 MetaData : Meta eol Meta eol Meta       { ($1, $3, $5) }
 
 IntList : IntExprs                      { $1 }  
+        | eol                           { [] }  
+        | eof                           { [] }
 
 Meta : set past '=' '[' MappingExps ']'  { MtPst $5 }
      | set pastCnt '=' int               { MtPstSize $4 }  

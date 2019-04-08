@@ -4,17 +4,28 @@ module Tokens where
 
 %wrapper "posn"
 
+--eof :: user -> AlexInput -> Int -> AlexInput -> Bool
+--eof _ _ _ (_, after) =
+--  case after of
+--    []       -> True  -- end-of-file
+--    _        -> False
+
+
+
 --digits
 $digit = 0-9
 --character
 $alpha = [a-zA-Z]
 --end of line character
 $eol   = [\n]
+--end of file character
+$eof   = [\EOF]
 
 -- The tokens: 
 tokens :-
   "$".*                             ;
   $eol+                             { tok (\p s -> TokenEndLine p) }
+  $eof                              { tok (\p s -> TokenEndFile p) }
   $white+                           ; 
   \-?$digit+                        { tok (\p s -> TokenInt p (read s)) }
   \=                                { tok (\p s -> TokenEq p) }
@@ -64,6 +75,7 @@ data Token =
   TokenPastCount     AlexPosn       |
   TokenInStreamCount AlexPosn       |
   TokenEndLine       AlexPosn       |
+  TokenEndFile       AlexPosn       |
   TokenVar           AlexPosn String
   deriving (Eq,Show) 
 
@@ -87,5 +99,6 @@ tokenPosn (TokenPast (AlexPn a l c)) = "Line:" ++ show(l) ++ " Col:" ++ show(c) 
 tokenPosn (TokenPastCount (AlexPn a l c)) = "Line:" ++ show(l) ++ " Col:" ++ show(c) ++ " ERROR: pastCount"
 tokenPosn (TokenInStreamCount (AlexPn a l c)) = "Line:" ++ show(l) ++ " Col:" ++ show(c) ++ " ERROR: inStreamCount"
 tokenPosn (TokenEndLine (AlexPn a l c)) = "Line:" ++ show(l) ++ " Col:" ++ show(c) ++ " ERROR: EOL (End of Line Character)"
+tokenPosn (TokenEndFile (AlexPn a l c)) = "Line:" ++ show(l) ++ " Col:" ++ show(c) ++ " ERROR: EOF (End of File Character)"
 tokenPosn (TokenSet (AlexPn a l c)) = "Line:" ++ show(l) ++ " Col:" ++ show(c) ++ " ERROR: set"
 }
