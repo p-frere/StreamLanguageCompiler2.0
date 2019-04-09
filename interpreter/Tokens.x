@@ -10,10 +10,11 @@ $digit = 0-9
 $alpha = [a-zA-Z]
 --end of line character
 $eol   = [\n\r]
+$space   = $white # [\n\r]
 
 -- The tokens: 
 tokens :-  
-  "$".*  ;
+  "$".*                             ;
   $eol+                             { tok (\p s -> TokenEndLine p) } 
   $white+                           ;
   \-?$digit+                        { tok (\p s -> TokenInt p (read s)) }
