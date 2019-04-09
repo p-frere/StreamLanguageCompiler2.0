@@ -51,9 +51,6 @@ outputToPrettyPrint _ = ""
 
 
 typeCheck :: [Expr] -> [ExType]
--- typeCheck (x:xs) = (typeOf [] x):(typeCheck xs)
--- typeCheck [] = []
-
 typeCheck xs = map (typeOf []) xs
 
 unparseTypeCheck :: [ExType] -> String
