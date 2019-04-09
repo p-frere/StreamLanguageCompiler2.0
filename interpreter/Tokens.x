@@ -9,14 +9,14 @@ $digit = 0-9
 --character
 $alpha = [a-zA-Z]
 --end of line character
-$eol   = [\n]
+$eol   = [\n\r]
 
 -- The tokens: 
-tokens :-
-  "$".*                             ;
-  $eol+                             { tok (\p s -> TokenEndLine p) }
+tokens :-  
+  "$".*  ;
+  $eol+                             { tok (\p s -> TokenEndLine p) } 
+  $white+                           ;
   \-?$digit+                        { tok (\p s -> TokenInt p (read s)) }
-  $white+                           ; 
   \=                                { tok (\p s -> TokenEq p) }
   \+                                { tok (\p s -> TokenPlus p) }
   sum                               { tok (\p s -> TokenPlus p) }
