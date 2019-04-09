@@ -29,8 +29,6 @@ tokens :-
   \[                                { tok (\p s -> TokenLParenSq p) }
   \]                                { tok (\p s -> TokenRParenSq p) }
   \,                                { tok (\p s -> TokenSeq p ) }
-  let                               { tok (\p s -> TokenLet p) }
-  in        		                    { tok (\p s -> TokenIn p) }
   \\                                { tok (\p s -> TokenLam p) }
   lam                               { tok (\p s -> TokenLam p) }
   set                               { tok (\p s -> TokenSet p) }
@@ -56,8 +54,6 @@ data Token =
   TokenLParenSq      AlexPosn       |
   TokenRParenSq      AlexPosn       |
   TokenSeq           AlexPosn       |
-  TokenLet           AlexPosn       |
-  TokenIn            AlexPosn       |
   TokenLam           AlexPosn       |
   TokenSet           AlexPosn       |
   TokenPast          AlexPosn       |
@@ -79,8 +75,6 @@ tokenPosn (TokenRParen (AlexPn a l c)) = "Line:" ++ show(l) ++ " Col:" ++ show(c
 tokenPosn (TokenLParenSq (AlexPn a l c)) = "Line:" ++ show(l) ++ " Col:" ++ show(c) ++ " ERROR: '['"
 tokenPosn (TokenRParenSq (AlexPn a l c)) = "Line:" ++ show(l) ++ " Col:" ++ show(c) ++ " ERROR: ']'"
 tokenPosn (TokenSeq (AlexPn a l c)) = "Line:" ++ show(l) ++ " Col:" ++ show(c) ++ " ERROR: Comma (Sequence)"
-tokenPosn (TokenLet (AlexPn a l c)) = "Line:" ++ show(l) ++ " Col:" ++ show(c) ++ " ERROR: Let Expression"
-tokenPosn (TokenIn (AlexPn a l c)) = "Line:" ++ show(l) ++ " Col:" ++ show(c) ++ " ERROR: in"
 tokenPosn (TokenLam (AlexPn a l c)) = "Line:" ++ show(l) ++ " Col:" ++ show(c) ++ " ERROR: Lambda Expression" 
 tokenPosn (TokenVar (AlexPn a l c) s) = "Line:" ++ show(l) ++ " Col:" ++ show(c) ++ " ERROR: Variable:" ++ show(s) 
 tokenPosn (TokenPast (AlexPn a l c)) = "Line:" ++ show(l) ++ " Col:" ++ show(c) ++ " ERROR: past"

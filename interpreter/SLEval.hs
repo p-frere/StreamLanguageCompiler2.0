@@ -48,9 +48,11 @@ getPast :: (Meta,Meta,Meta) -> Past
 getPast (MtPst p, s, f) = p
 
 updateMeta :: (Meta,Meta,Meta) -> (Meta,Meta,Meta)
-updateMeta (MtPstSize p, MtInCnt s, MtFuncs f) = (MtPst (generatePast s (length f) p), MtInCnt s, MtFuncs f)
+updateMeta (MtPstSize p, MtInCnt s, MtFuncs f) | (p>0) && (s>0) = (MtPst (generatePast s (length f) p), MtInCnt s, MtFuncs f)
+                                               | otherwise = error "Invalid stream or size number" 
 updateMeta (MtPst p, s, f) = (MtPst p, s, f)
-updateMeta (MtInCnt s,MtPstSize p,MtFuncs f) = (MtPst (generatePast s (length f) p), MtInCnt s, MtFuncs f)
+updateMeta (MtInCnt s,MtPstSize p,MtFuncs f) | (p>0) && (s>0) = (MtPst (generatePast s (length f) p), MtInCnt s, MtFuncs f)
+                                             | otherwise = error "Invalid stream or size number" 
 updateMeta (s, MtPst p, f) = (MtPst p, s, f)
 
 -- incnt outcnt pstcnt

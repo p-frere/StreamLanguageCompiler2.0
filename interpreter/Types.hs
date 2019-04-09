@@ -32,19 +32,8 @@ typeOf tenv (ExVar x) = getBinding x tenv
 typeOf tenv (ExLam x e) = ExFun u 
   where u = typeOf (addBinding x TyExInt tenv) e
 
-
-
-
 typeOf tenv (ExApp e1 e2) | t3 == TyExInt = t2
   where ((ExFun t2),t3) = (typeOf tenv e1, typeOf tenv e2)
-
-
-
-
-
-typeOf tenv (ExLet x e1 e2) | TyExInt == t1 = typeOf (addBinding x TyExInt tenv) e2
-  where t1 = typeOf tenv e1
-
 
 typeOf tenv _ = error "Type Error"
 

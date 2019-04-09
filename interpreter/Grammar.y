@@ -19,8 +19,6 @@ import Tokens
    '['      { TokenLParenSq _ }
    ']'      { TokenRParenSq _ }
    ','      { TokenSeq _ }
-   let      { TokenLet _ }
-   in       { TokenIn _ }
    var      { TokenVar _ $$ }
    lam      { TokenLam _ }
    set      { TokenSet _ }
@@ -30,10 +28,10 @@ import Tokens
    eol      { TokenEndLine _ }
 
 --associations
-%nonassoc int var '(' ')' '[' ']' in 
+%nonassoc int var '(' ')' '[' ']' 
 %left '+' '-'
 %left '*' 
-%right lam let
+%right lam 
 %left APP
 
 %%
@@ -61,7 +59,6 @@ Expr : '(' Expr ')'                  { $2 }
      | '*' '(' Expr ',' Expr ')'     { ExMult ($3) ($5) }
      | Expr Expr %prec APP           { ExApp ($1) ($2) } 
      | lam var '(' Expr ')'          { ExLam ($2) ($4) }
-     | let var '=' Expr in Expr      { ExLet $2 ($4) ($6) }
 
 MappingExps : MappingExps ',' MappingExp            { $3 : $1 }
             | MappingExp                            { [$1] }
@@ -99,7 +96,6 @@ data Expr = ExInt Int
           | ExMult Expr Expr  
           | ExApp Expr Expr
           | ExLam String Expr
-          | ExLet String Expr Expr 
           | Cl String Expr Environment
           deriving (Show,Eq)
 } 
