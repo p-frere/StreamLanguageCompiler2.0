@@ -1,7 +1,8 @@
 module SLEval where
 import Grammar
-import Debug.Trace
---import GrammarStream
+
+---------Imported Data structures---------- 
+
 --data Expr = ExInt Int
 --            | ExVar String
 --            | ExSum Expr Expr
@@ -10,10 +11,22 @@ import Debug.Trace
 --            | Cl String Expr Environment
 --            | ExApp Expr Expr
 --            | ExLam String Expr
---            | ExLet String Expr Expr deriving (Show,Eq)
+
+--type Environment = [ (String,Expr) ]
+
+--type Mapping = ([Expr],[Expr])
+--type Past = [Mapping]
+--type FuncList = [Expr]
+--type InputList = [Expr]
+
+--type MetaData = (Meta, Meta, Meta)
+
+--data Meta = MtFuncs [Expr]
+--            | MtPst Past
+--            | MtPstSize Int
+--            | MtInCnt Int
 
 type Configuration = (Expr,Environment,Kontinuation)
---type Environment = [ (String,Expr) ]
 
 -- Holds the expresion in the kontinuation in a partially evaluated form
 data Frame =    SumH_ Expr Environment | Sum_H Expr
@@ -25,28 +38,12 @@ data Frame =    SumH_ Expr Environment | Sum_H Expr
 type Kontinuation = [ Frame ]
 type State = (Expr,Environment,Kontinuation)
 
---type Mapping = ([Expr],[Expr])
---type Past = [Mapping]
---type FuncList = [Expr]
---type InputList = [Expr]
-
--- cnt past func
---type MetaData = (Meta, Meta, Meta)
-
---data Meta = MtFuncs [Expr]
---            | MtPst Past
---            | MtPstSize Int
---            | MtInCnt Int
 ----------------past processing-------------------------
 
---getPast :: (Meta,Meta,Meta) -> Past
---getPast (MtPstSize s, generatePast s p, f) = generatePast s p
---getPast (s, MtPst p, f) = p
-
 getPast :: (Meta,Meta,Meta) -> Past
--- getPast (MtPstSize p, MtInCnt s, f) = (MtPst (generatePast s p), MtInCnt s, f)
 getPast (MtPst p, s, f) = p
 
+-- updates meta to get correct past format if none
 updateMeta :: (Meta,Meta,Meta) -> (Meta,Meta,Meta)
 updateMeta (MtPstSize p, MtInCnt s, MtFuncs f) | (p>0) && (s>0) = (MtPst (generatePast s (length f) p), MtInCnt s, MtFuncs f)
                                                | otherwise = error "Invalid stream or size number" 
@@ -55,7 +52,7 @@ updateMeta (MtInCnt s,MtPstSize p,MtFuncs f) | (p>0) && (s>0) = (MtPst (generate
                                              | otherwise = error "Invalid stream or size number" 
 updateMeta (s, MtPst p, f) = (MtPst p, s, f)
 
--- incnt outcnt pstcnt
+-- generates a blank past
 generatePast :: Int -> Int -> Int -> Past
 generatePast inCnt outCnt pstCnt
     | pstCnt > 0  = (replicate0 inCnt,replicate0 outCnt) : generatePast inCnt outCnt (pstCnt-1)
@@ -63,7 +60,7 @@ generatePast inCnt outCnt pstCnt
     where
         replicate0 n = map (\x -> ExInt x) (replicate n 0)
 
------------------Building lambda function from meta data-----------------
+-----------------Building lambda function from metadata functions-----------------
 
 evalFunc :: (Meta,Meta,Meta) -> [Expr]
 evalFunc (m1,m2,MtFuncs f) = evalFunc1 (m1,m2,MtFuncs f,length f)
@@ -75,13 +72,13 @@ evalFunc1 (MtPst p, MtInCnt i, MtFuncs (f:fs), n)
         where
             vars = generateVars i n (length p)
 
-
-
+-- builds lambdas out of functions and variable list
 -- ExVAr -> Function -> Lam
 generateLam :: [Expr] -> Expr -> Expr
 generateLam [ExVar s] f = ExLam s f
 generateLam ((ExVar s):ss) f = (ExLam s (generateLam ss f))
 
+-- produces an ordered list of all possible var names
 -- stream countin, stream count out, past size -> Vars
 generateVars :: Int -> Int -> Int -> [Expr]
 generateVars sin sout p  =  (makeMapOut streamOutVars) ++ (makeMapIn streamInVars) ++ streamInVars
@@ -94,28 +91,26 @@ generateVars sin sout p  =  (makeMapOut streamOutVars) ++ (makeMapIn streamInVar
         makeMapOut ((ExVar sv):svs)
             | svs /= [] = getPastVarsOut sv p ++ makeMapOut (svs)
             | otherwise = getPastVarsOut sv p
-
+        
+-- gets the names of all possible vars in
 getPastVarsIn :: String -> Int -> [Expr]
 getPastVarsIn s i
     | i > 0 = [ExVar (s++".in"++show i)] ++ getPastVarsIn s (i-1)
     | otherwise = []
-
+-- gets the names of all possible vars out
 getPastVarsOut :: String -> Int -> [Expr]
 getPastVarsOut s i
     | i > 0 = [ExVar (s++".out"++show i)] ++ getPastVarsOut s (i-1)
     | otherwise = []
 
+-- gets the names of all possible vars for streams
 getStreamVars :: Int -> [Expr]
 getStreamVars i
     | i > 0 = [ExVar ("s"++show (i-1))] ++ getStreamVars (i-1)
     | otherwise = []
 
--- getPastVars :: String -> Int -> [Expr]
--- getPastVars s i
---     | i > 0 = [ExVar (s++".out"++show i)] ++ [ExVar (s++".in"++show i)] ++ getPastVars s (i-1)
---     | otherwise = []
-
 ----------Applying Apps to lambda and calling eval--------------------
+
 -- function     streamInput         oldPast                         newPast
 -- ExLam()      [s1 s2 s3 ..]       [([1,2],[3]) ([2,3],[5])]       [([1,2],[3]) ([2,3],[5])]
 evalIn :: FuncList -> InputList -> Past -> Past
@@ -124,9 +119,9 @@ evalIn fs is p = updatePast is [evalLoop (buildExpr f is p)| f <- fs ] p
 -- add new pairing to past window
 --              ins         outs    oldPAst newPast
 updatePast :: InputList -> [Expr] -> Past -> Past
---updatePast is os [] = []
 updatePast is os p = (is,os) : init p
 
+-- Applies input to lambdas
 -- func ins past
 buildExpr ::  Expr -> InputList -> Past -> Expr
 buildExpr f is p =  wrapIns f (is++(orderPastIn p)++(orderPastOut p))
@@ -145,13 +140,8 @@ buildExpr f is p =  wrapIns f (is++(orderPastIn p)++(orderPastOut p))
         orderPastOut (x:xs) = snd x ++ orderPastOut xs
 
 ---------Solve lambda with eval------------------------------------
--- Function to iterate the small step reduction to termination
--- evalLoop :: Expr -> Expr
--- evalLoop e = evalLoop' (e,[],[])
---     where evalLoop' (e,env,k) = if (e' == e) && (k' == []) && (isValue e') then e' else evalLoop' (e',env',k')
---                     where (e',env',k') = eval1 (e,env,k)
 
--- -- Debug version of evalLoop
+--Loops to step through evaluation
 evalLoop :: Expr -> Expr
 evalLoop e = evalLoop' (e,[],[])
    where evalLoop' (e,env,k) = if (e' == e) && (k' == []) && (isValue e') then e' else evalLoop' (e',env',k')
@@ -168,16 +158,9 @@ unpack :: Expr -> Environment -> (Expr,Environment)
 unpack (Cl x e env1) env2 = ((Cl x e env1), env1)
 unpack e env = (e,env)
 
--- unpack :: Expr -> (Expr,Environment)
--- unpack (Cl x e env1) = ((ExLam x e) , env1)
--- unpack e = (e,[])
--- unpack (Cl x e env1) = ((Cl x e env1), env1)
--- unpack e = (e,[])
-
 -- Pairs a variable's value and it's enviroment
 update :: Environment -> String -> Expr -> Environment
 update env x e = (x,e) : env
---update env x e1 y e2 = (x,e1):(y,e2):env
 
 
 ----------- Evaluation functions ----------------------------
@@ -212,6 +195,8 @@ eval1 (v,env1,(App_H (Cl x e env2) ) : k )  = (e, update env2 x v, k)
 -- Value, Rule for terminated evaluations
 eval1 (v,env,[]) | isValue v = (v,env,[])
 
+-- throw error if pattern not expected 
+eval1 x = error "Invalid stream input or past input" 
 --------------------Other Functions-----------------
 
 -- Checks for terminated expressions
@@ -223,7 +208,3 @@ unparse :: [Expr] -> String
 unparse [] = ""
 unparse ((ExInt n):ns) = show n ++ ", " ++ unparse ns
 unparse (n:ns) = "Unknown" ++ ", " ++ unparse ns
-
--- unparse :: Expr -> String
--- unparse (ExInt n) = show n
--- unparse _ = "Unknown"

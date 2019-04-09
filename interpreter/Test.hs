@@ -5,13 +5,11 @@ import Types
 import System.Environment
 import Control.Exception
 import System.IO
-import Control.Monad
-import Data.Char
-import Text.Read
 
 main :: IO ()
 main = catch main' noParse
 
+--takes code and evaluates it into functions
 main' = do (fileName : _ ) <- getArgs
            sourceText <- readFile fileName
            let parsedProg = parseCalc (alexScanTokens sourceText)
@@ -21,6 +19,7 @@ main' = do (fileName : _ ) <- getArgs
            let typedProg = typeCheck funcs
            getUserInputs funcs past
 
+--Loops on evaluating input until EOF is read
 getUserInputs :: FuncList -> Past -> IO ()
 getUserInputs f p = do
     done <- isEOF 
@@ -43,12 +42,11 @@ prettyPrint :: [Expr] -> String
 prettyPrint ((Grammar.ExInt x):xs)    
     | xs /= [] = show x ++ " " ++ prettyPrint xs
     | ((Grammar.ExInt x):xs) /= []  = show x  
-
+prettyPrint x = error "Invalid stream input" 
 
 outputToPrettyPrint :: Past -> String
 outputToPrettyPrint ( (_,xs):ns) = prettyPrint (xs)
 outputToPrettyPrint _ = ""
-
 
 typeCheck :: [Expr] -> [ExType]
 typeCheck xs = map (typeOf []) xs
@@ -57,10 +55,7 @@ unparseTypeCheck :: [ExType] -> String
 unparseTypeCheck (x:xs) = unparseType x ++ unparseTypeCheck xs
 unparseTypeCheck [] = ""
 
-
-getFuncs :: (Meta,Meta,Meta)  -> [Expr]
-getFuncs (_,_,(MtFuncs fs)) = fs
-
+-- Handles errors
 noParse :: ErrorCall -> IO ()
 noParse e = do let err =  show e
                hPutStr stderr err
