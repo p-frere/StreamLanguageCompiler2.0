@@ -1,6 +1,7 @@
 module Types where 
 import Grammar
 
+--Data Types
 data ExType = TyExInt
             | ExFun ExType
             deriving (Show,Eq)
@@ -15,6 +16,7 @@ getBinding x ((y,t):tenv) | x == y  = t
 addBinding :: String -> ExType -> TypeEnvironment -> TypeEnvironment
 addBinding x t tenv = (x,t):tenv
 
+--Type checking
 typeOf :: TypeEnvironment -> Expr -> ExType
 typeOf tenv (ExInt _ )  = TyExInt
 

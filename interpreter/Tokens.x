@@ -10,6 +10,7 @@ $digit = 0-9
 $alpha = [a-zA-Z]
 --end of line character
 $eol   = [\n\r]
+--space character
 $space   = $white # [\n\r]
 
 -- The tokens: 
@@ -65,6 +66,7 @@ data Token =
   deriving (Eq,Show) 
 
 
+--Error messages
 tokenPosn :: Token -> String
 tokenPosn (TokenInt (AlexPn a l c) s) = "Line:" ++ show(l) ++ " Col:" ++ show(c) ++ " ERROR: Integer:" ++ show(s) 
 tokenPosn (TokenEq  (AlexPn a l c)) = "Line:" ++ show(l) ++ " Col:" ++ show(c) ++ " ERROR: '='"
