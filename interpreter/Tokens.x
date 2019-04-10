@@ -16,7 +16,7 @@ $space   = $white # [\n\r]
 tokens :-  
   "$".*                             { tok (\p s -> TokenEndLine p) }
   $eol+                             { tok (\p s -> TokenEndLine p) } 
-  $white+                           ;
+  $space+                           ;
   \-?$digit+                        { tok (\p s -> TokenInt p (read s)) }
   \=                                { tok (\p s -> TokenEq p) }
   \+                                { tok (\p s -> TokenPlus p) }
