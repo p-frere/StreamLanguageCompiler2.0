@@ -1,0 +1,4 @@
+set past = [([0],[0])]
+set inStreamCount = 1
+
+s0.in1
