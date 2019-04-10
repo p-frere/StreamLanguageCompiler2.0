@@ -1,0 +1,67 @@
+#!/bin/bash
+
+executable="./myinterpreter"
+
+totalpassed=0
+for i in 1 2 3 4 5
+do
+	echo 
+	echo "*****************"
+	echo "*     pr $i     *"
+	echo "*****************"	
+	prog="pr$i.spl"
+	passed=0
+	for j in 1
+	do
+		echo 
+		echo "  ******************************"
+		echo "  *          test $j           *"
+		echo "  ******************************"
+		in="pr$i/"
+		in+=$j
+		in+="in"
+		out="out$i.$j"
+
+		echo "  Input:"
+		echo "  ------"
+		cat $in | sed "s/^/  /"
+		echo
+
+
+		#echo "  $executable $prog < $in > $out"
+		
+
+		#gtimeout 10s 
+		$executable $prog < $in > $out 2>/dev/null
+
+
+		if [ "$?" = 124 ]; then
+			echo -e "  TEST FAILED -- TIMEOUT"
+		else
+			outofficial="pr$i/"
+			outofficial+=$j
+			outofficial+="out" 
+
+			diff -wB $out $outofficial > /dev/null
+			if [ "$?" = 0 ]; then
+				passed=$((passed+1))
+				echo -e "  TEST PASSED" 
+			else
+				echo -e "  TEST FAILED" 
+				echo 
+				echo "  Your output:"
+				echo "  ------------"
+				cat $out | sed "s/^/  /"
+				echo
+				echo "  Correct output:"
+				echo "  ---------------"
+				cat $outofficial | sed "s/^/  /"
+				echo
+			fi
+		fi
+	done
+	echo 
+	echo "$passed tests passed for pr$i"
+	totalpassed=$((totalpassed+passed))
+done
+echo "$totalpassed tests passed in total"
