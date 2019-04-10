@@ -14,7 +14,7 @@ $space   = $white # [\n\r]
 
 -- The tokens: 
 tokens :-  
-  "$".*                             ;
+  "$".*                             { tok (\p s -> TokenEndLine p) }
   $eol+                             { tok (\p s -> TokenEndLine p) } 
   $white+                           ;
   \-?$digit+                        { tok (\p s -> TokenInt p (read s)) }
