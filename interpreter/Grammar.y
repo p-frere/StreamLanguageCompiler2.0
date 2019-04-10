@@ -36,7 +36,9 @@ import Tokens
 
 %%
 
-MetaData : Meta EOL Meta EOL Meta       { ($1, $3, $5) }
+MetaData : Meta EOL Meta EOL Meta           { ($1, $3, $5) }
+         | EOL Meta EOL Meta EOL Meta       { ($2, $4, $6) }
+         | EOL Meta EOL Meta EOL Meta EOL   { ($2, $4, $6) }
 
 IntList : IntExprs                      { $1 }
 
@@ -49,6 +51,7 @@ Meta : set past '=' '[' MappingExps ']'  { MtPst $5 }
      | ExprList                          { MtFuncs $1 }
 
 ExprList : Expr                      { [$1] }
+         | Expr EOL                  { [$1] }
          | Expr EOL ExprList         { $1 : $3 }
 
 Expr : '(' Expr ')'                  { $2 }

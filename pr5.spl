@@ -1,4 +1,4 @@
 set pastCount = 2
 set inStreamCount = 1
-$test at
+
 s0.out1 + s0.out2 + s0
